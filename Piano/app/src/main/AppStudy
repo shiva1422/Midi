@@ -1,0 +1,13 @@
+
+
+
+Synthesia:
+
+starting :
+Midi *midi = Midi::ReadFromFile();
+
+SharedState.midi = midi;
+
+GameStateManager.SetInitialState(new TitleState(state));
+
+//GameStateManager as global contex through which mouse ,key draw events are called

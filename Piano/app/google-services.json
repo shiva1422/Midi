@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "771985140565",
+    "firebase_url": "https://digibandpiano-82cef.firebaseio.com",
+    "project_id": "digibandpiano-82cef",
+    "storage_bucket": "digibandpiano-82cef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771985140565:android:281f49015be31798011ddc",
+        "android_client_info": {
+          "package_name": "com.kalasoft.digibandpiano"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "771985140565-ofevtv0dfkkh5153rjlrdb5f87kllt34.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBI1K5CA-7no5QDwDYT5UvUO7OxT2G1GUM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "771985140565-ofevtv0dfkkh5153rjlrdb5f87kllt34.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
