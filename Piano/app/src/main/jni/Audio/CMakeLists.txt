@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 
-add_library(pianoaudiolib STATIC SLESAudioPlayer.cpp OboeAudioRenderNode.cpp)
+add_library(pianoaudiolib STATIC AudioSamples.cpp SLESAudioPlayer.cpp OboeAudioRenderNode.cpp)
 
 #Oboe
 include(FetchContent)

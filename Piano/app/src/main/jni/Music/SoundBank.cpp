@@ -81,8 +81,6 @@ int SoundBank::generateSamples(AudioSamples *samples)
 
         if(bIter)
             ++iter;
-
-
         maxFillCnt = std::max(maxFillCnt, frameNo + 1);
         KSLOGD(LOGTAG,"boom notes2");
 

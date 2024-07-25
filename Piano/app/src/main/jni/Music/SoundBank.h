@@ -40,6 +40,15 @@ private:
     int remainingSamples = 0;
 };
 
+//TODOo Move Out
+
+class ISamplesGenerator{
+
+public:
+
+    virtual int generateSamples(AudioSamples *samples) = 0;
+
+};
 //TODO convert to Instrument
 class SoundBank : public ISamplesGenerator{
 

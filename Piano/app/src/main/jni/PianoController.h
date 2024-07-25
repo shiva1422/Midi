@@ -11,8 +11,6 @@
 #include "GN/IMediaNode.h"
 #include "Audio/OboeAudioRenderNode.h"
 
-
-
 /**
  * This should be triggered from touch,Keyboard/midi
  * Controls both UI and Music,Make sure all members are initialized right   before calling any function

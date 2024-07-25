@@ -119,8 +119,8 @@ DataCallbackResult OboeAudioRenderNode::onAudioReady(AudioStream *audioStream, v
             curPipeline->end();
         return oboe::DataCallbackResult::Continue;
     }
- //KSLOGD(TAGLOG,"audio input Sc %d bufSize %d output sc %d bufsize %d",curBuf->getSampleCnt(),curBuf->getBufferSize(),numFrames,bufSize);
-    assert(curBuf->getBufferSize() == bufSize);
+    KSLOGD(TAGLOG,"audio input Sc %d bufSize %d output sc %d bufsize %d",curBuf->getSampleCnt(),curBuf->getBufferSize(),numFrames,bufSize);
+   //assert(curBuf->getBufferSize() == bufSize);
     memcpy(audioData,curBuf->data(),numFrames*audioStream->getBytesPerFrame());
     curPipeline->end();
     return oboe::DataCallbackResult::Continue;

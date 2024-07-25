@@ -46,7 +46,7 @@ add_subdirectory(./Text ./kstextlib)
 
 
 
-target_link_libraries(ksmain ksapp  music pianoaudiolib  pianoui kspiano android  kstextlib ksimage)
+target_link_libraries(ksmain ksapp  music kspiano pianoaudiolib  pianoui  android  kstextlib ksimage)
 
 link_directories(ksmain PUBLIC ${FT_DIR}/CMAKE_ANDROID_ARCH_ABI)
 

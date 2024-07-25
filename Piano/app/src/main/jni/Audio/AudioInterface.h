@@ -6,7 +6,7 @@
 #define KALASOFT_AUDIOINTERFACE_H
 
 #include "Commons.h"
-#include "KSLog.h"
+#include "Logger/KSLog.h"
 
 namespace ks{
 

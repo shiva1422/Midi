@@ -44,6 +44,8 @@ public:
 
     ks::Buffer* getAudioBuffer() const{return audioBuffer;}
 
+    uint8_t *data(){return audioBuffer->data[0];}//TODO NO_OP.
+
     //size in bytes of data()
     int getBufferSize() const {return bufSize;}
     

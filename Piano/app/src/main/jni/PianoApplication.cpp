@@ -58,12 +58,12 @@ void PianoApplication::onCreate()
 
     std::string midipath = "music/midi/havana.mid";
 
-    midiPlayer.setMediaSource(openAsset(midipath.c_str()));
-    midiPlayer.setListenerPiano(pianoController.getController());
+    //midiPlayer.setMediaSource(openAsset(midipath.c_str()));
+   // midiPlayer.setListenerPiano(pianoController.getController());
 
     setContentView(pianoVew);
 
-    midiPlayer.play();//TODO;
+   // midiPlayer.play();//TODO;
 
 }
 
