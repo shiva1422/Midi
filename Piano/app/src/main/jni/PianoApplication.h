@@ -16,6 +16,7 @@
 #include "PianoController.h"
 #include "Audio/OboeAudioRenderNode.h"
 #include "Midi/MidiPlayer.h"
+#include "UI/PianoView.h"
 
 
 class PianoApplication : public KSApplication{
@@ -75,7 +76,7 @@ protected:
 private:
 
     PianoSynthNode piano;
-    RainbowPianoView *pianoVew = nullptr;
+    PianoView *pianoVew = nullptr;
 
     MidiPlayer midiPlayer;
     //This controls UI and Music Synth

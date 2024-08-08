@@ -2,9 +2,8 @@
 // Created by shivaaz on 12/18/22.
 //
 
-#ifndef DIGIBANDPIANO_IPIANOVIEW_H
-#define DIGIBANDPIANO_IPIANOVIEW_H
-#include "array"
+#ifndef KALASOFT_IPIANOVIEW_H
+#define KALASOFT_IPIANOVIEW_H
 
 class IPianoView {
 
@@ -12,4 +11,4 @@ public:
 
 };
 
-#endif //DIGIBANDPIANO_IPIANOVIEW_H
+#endif //KALASOFT_IPIANOVIEW_H

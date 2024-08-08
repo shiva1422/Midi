@@ -1,9 +1,9 @@
 //
-// Created by shivaaz on 12/2/22.
+// Created by shivaaz on 8/6/24.
 //
 
-#ifndef KALASOFT_RAINBOWPIANOVIEW_H
-#define KALASOFT_RAINBOWPIANOVIEW_H
+#ifndef KALASOFT_PIANOVIEW_H
+#define KALASOFT_PIANOVIEW_H
 
 #include <KSUI/GL/GLView.h>
 #include <CMedia/KSImage.h>
@@ -17,36 +17,29 @@
 #include "../Piano/IPianoController.h"
 #include <mutex>
 
+
 #define MIN_WHITEKEY_COUNT 7
 #define MAX_WHITEKEY_COUNT 52
 #define DEFAULT_WHITEKEY_COUNT 52
 
 
-   /*
-    * Draw keyboard using openGL instanced rendering with rainbow colors,
-    * Total Keys 88 ,whitekeys - 52,blackkeys -36
-    * A0 - C8
-    */
-class RainbowPianoView : public View , public IPianoController{
-
-
+class PianoView : public View, public IPianoController{
 
     //TODO Moves Shaders to here as string rather than reading from assets
 
 public:
-
     /***VIEW***/
 
-    RainbowPianoView();
+    PianoView();
 
-    RainbowPianoView(float width, float height);
+    PianoView(float width, float height);
 
-    RainbowPianoView(float startX, float startY, float width, float height);
+    PianoView(float startX, float startY, float width, float height);
 
     //TODO later make Text engine into common without explicit dependency
-    RainbowPianoView(float startX, float startY, float width, float height, TextEngine *textEngine);
+    PianoView(float startX, float startY, float width, float height, TextEngine *textEngine);
 
-    ~RainbowPianoView() override;
+    ~PianoView() override;
 
     void setBounds(float startX, float startY, float width, float height) override;
 
@@ -54,7 +47,7 @@ public:
 
     void draw() override;
 
-   // void prepare();
+    // void prepare();
 
     void testDraw();
 
@@ -100,7 +93,11 @@ private:
     GLuint keysAndNoteNamesShader = 0;
 
     //locations for above shader
-    GLint whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc,keysAreaBoundsLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,keyGapXLoc;
+    GLint whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc,keysAreaBoundsLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,keyGapXLoc,
+            textureCoordsLoc;
+
+    //2 textures for each one off and one on.
+    GLint keyTexLoc;
 
     GLuint shader = 0;//Right now a Rainbow PianoSynth,Will change later to Textured One Should
 
@@ -119,7 +116,11 @@ private:
     //Textures
     KSImage allKeysImage;
 
-    GLuint allKeyTex = 0 ,noteNamesTex = 0 , noteNamesBuf = 0;
+    KSImage keyImages[4];//black key, blackKeyTap,whiteKey,whiteKeyTap;
+
+    GLuint keyTextures[4];//
+
+    GLuint allKeyTex = 0,noteNamesTex = 0 , noteNamesBuf = 0;
 
     //TODO move outof this
     TextEngine *textEngine = nullptr;
@@ -160,7 +161,7 @@ private:
 
     float keyCountModifierTranlations[2];
     //WhiteKeys
-    int numWhiteKeysVisible = 10;
+    int numWhiteKeysVisible = 10;//MAX_WHITEKEY_COUNT;
 
     float whiteKeyWidth = 50;//px
 
@@ -195,12 +196,39 @@ private:
     //Below only touch related
 private:
 
-    friend class RainbowPianoTouchListener;
+    friend class PianoTouchListener;
+
     //x,y in screen coords
     EKeyName getKeyNoAtLoc(float x,float y);
-    
+
+
+};
+
+
+//TODO extend this as PianoController as this controls piano
+class PianoTouchListener : public View::TouchListener{
+
+protected:
+
+    bool onTouchDown(const float &x, const float &y, const ks::TouchID &id,const bool &isPrimary) override;
+
+    bool onTouchUp(const float &x, const float &y, const ks::TouchID &id, const bool &isLast) override;
+
+    bool onMove(const float &x, const float &y, const ks::TouchID &id) override;
+
+    //TODO dont used this
+    bool onTouch(const ks::MotionEvent &event, View *view) override;
+
+    bool onHoverExit(const ks::TouchID &id) override;
+
+private:
+
+    //store key pointed by touch pointer id ,//TODO this assumes pointerId is always less than 50 need verify;
+    EKeyName previousPointedKey[50];//max of 50 finger movements too many
 };
 
 
 
-#endif //KALASOFT_RAINBOWPIANOVIEW_H
+
+
+#endif //KALASOFT_PIANOVIEW_H

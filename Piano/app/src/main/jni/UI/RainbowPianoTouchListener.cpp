@@ -15,19 +15,19 @@ bool RainbowPianoTouchListener::onTouch(const ks::MotionEvent &event, View *view
 //TODO not using this now
     int32_t index = event.getPointerIndex();
     int32_t id  = event.getPointerId(index);
-    float touchX = event.getX(index);
-    float touchY = event.getY(index);
-    KSLOGD(LOGTAG,"PianoSynthNode on Touch x %f y %f ",touchX,touchY);
+    float pointX = event.getX(index);
+    float pointY = event.getY(index);
+    KSLOGD(LOGTAG,"PianoSynthNode on Touch x %f y %f ",pointX,pointY);
     RainbowPianoView *piano = static_cast<RainbowPianoView *>(view);
 
 
     //TODO maybe need to check touch event history cause when swipes speed across screen some ponts may be missiong
     //therfore some keys may not be played or events may be repeated check;
     assert(piano);
-    if(piano->keysAreaView.isPointInside(touchX,touchY))
+    if(piano->keysAreaView.isPointInside(pointX,pointY))
     {    //Touch action on keys
         KSLOGD(LOGTAG,"touching keysArea");
-        EKeyName keyName = piano->getKeyNoAtLoc(touchX,touchY);
+        EKeyName keyName = piano->getKeyNoAtLoc(pointX,pointY);
         piano->controller->setKeyState(keyName,EKeyState::KEYSTATE_ON);
 
         return true;

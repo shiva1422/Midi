@@ -1,6 +1,9 @@
 //
-// Created by shivaaz on 12/2/22.
+// Created by shivaaz on 8/6/24.
 //
+
+#include "PianoView.h"
+
 
 #include <cstdint>
 //TODO independent of disp.h
@@ -10,79 +13,84 @@
 #include <vector>
 #include "RainbowPianoView.h"
 #include "Media/KSImage/KSImageLoader.h"
-#define TAGLOG "RainbowPianoView"
+#define TAGLOG "PianoView"
 
 
 /*
  * To modify any postion of keys or others things on piano check directly in setBounds;
  * //check setupTextures done correctly
  */
-RainbowPianoView :: RainbowPianoView()
+
+static GLushort keyIndices[] = {0, 1, 2, 2, 3, 0};
+static float textCoods[]={0,1,1,1,1,0,0,0};
+
+
+PianoView :: PianoView()
 {
 
 }
-RainbowPianoView::RainbowPianoView(float width, float height) : RainbowPianoView(0, 0, width, height)
+PianoView::PianoView(float width, float height) : PianoView(0, 0, width, height)
 {
 
 }
 
-RainbowPianoView::RainbowPianoView(float startX, float startY, float width, float height) : View(startX, startY, width, height)
+PianoView::PianoView(float startX, float startY, float width, float height) : View(startX, startY, width, height)
 {
     setBounds(startX,startY,width,height);
 }
 
-RainbowPianoView::RainbowPianoView(float startX, float startY, float width, float height, TextEngine *textEngine) : RainbowPianoView(startX, startY, width, height)
+PianoView::PianoView(float startX, float startY, float width, float height, TextEngine *textEngine) : PianoView(startX, startY, width, height)
 {
 
     this->textEngine = textEngine;
 }
 
-RainbowPianoView::~RainbowPianoView()
+PianoView::~PianoView()
 {
     //clear Textures,clear Shader,delete allkeysImage
 }
 
-void RainbowPianoView::clearBackground()
+void PianoView::clearBackground()
 {
     //DOnt use this method
     glEnable(GL_SCISSOR_TEST);
     glScissor(startX,dispMetrics.screenHeight-startY-height,width,height);//if glScissor enable after this then scissor bounds should bes same as viewport bounds;
     glClearColor(r,g,b,a);
     glClear(GL_COLOR_BUFFER_BIT);
-   // glDisable(GL_SCISSOR_TEST);//end of drawing TODO
+    // glDisable(GL_SCISSOR_TEST);//end of drawing TODO
 }
 
 
 
 
-void RainbowPianoView::testDraw()
+void PianoView::testDraw()
 {
-   keyPositionModifierViewFull.setBackgroundColor(1.0,0.2,1.0,1.0);
-   keyPositionModifierView.setBackgroundColor(0.0,0.4,1.0,1.0);
-   keyCountDecView.setBackgroundColor(0.4, 1.0, 0.5, 1.0);
-   noteNameView.setBackgroundColor(1.0,0.0,0.0,1.0);
-   octaveNumView.setBackgroundColor(0.0,1.0,1.0,1.0);
-   whiteKeyView.setBackgroundColor(1.0,1.0,1.0,1.0);
-   blackKeyView.setBackgroundColor(0.0,0.0,0.0,1.0);
-   keyPositionModifierViewFull.clearBackground();
-   keyPositionModifierView.clearBackground();
-   keyCountDecView.clearBackground();
-   whiteKeyView.clearBackground();
-   blackKeyView.clearBackground();
-   noteNameView.clearBackground();
-   octaveNumView.clearBackground();
+    keyPositionModifierViewFull.setBackgroundColor(1.0,0.2,1.0,1.0);
+    keyPositionModifierView.setBackgroundColor(0.0,0.4,1.0,1.0);
+    keyCountDecView.setBackgroundColor(0.4, 1.0, 0.5, 1.0);
+    noteNameView.setBackgroundColor(1.0,0.0,0.0,1.0);
+    octaveNumView.setBackgroundColor(0.0,1.0,1.0,1.0);
+    whiteKeyView.setBackgroundColor(1.0,1.0,1.0,1.0);
+    blackKeyView.setBackgroundColor(0.0,0.0,0.0,1.0);
+    keyPositionModifierViewFull.clearBackground();
+    keyPositionModifierView.clearBackground();
+    keyCountDecView.clearBackground();
+    whiteKeyView.clearBackground();
+    blackKeyView.clearBackground();
+    noteNameView.clearBackground();
+    octaveNumView.clearBackground();
 }
 
 
-void RainbowPianoView::drawNonKeyViews()
+void PianoView::drawNonKeyViews()
 {
     assert(false);
 }
 
-static  GLushort keyIndices[] = {0, 1, 2, 2, 3, 0};
 
 
-void RainbowPianoView::drawKeysAndNoteNames()
+//TODO VAO
+void PianoView::drawKeysAndNoteNames()
 {
     /*
      * draw all in one call using instance rendering
@@ -100,7 +108,7 @@ void RainbowPianoView::drawKeysAndNoteNames()
 
     //GLContext::getError("drawKeysAndNoteNames0");
     glUseProgram(keysAndNoteNamesShader);
-   // GLContext::getError("drawKeysAndNoteNames 1");
+    // GLContext::getError("drawKeysAndNoteNames 1");
 
     glEnableVertexAttribArray(whiteKeyVertsLoc);
     glVertexAttribPointer(whiteKeyVertsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) whiteKeyView.getVertices());
@@ -108,7 +116,10 @@ void RainbowPianoView::drawKeysAndNoteNames()
     glEnableVertexAttribArray(blackKeyVertsLoc);
     glVertexAttribPointer(blackKeyVertsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) blackKeyView.getVertices());
 
-   // GLContext::getError("drawKeysAndNoteNames 3");
+    glEnableVertexAttribArray(textureCoordsLoc);
+    glVertexAttribPointer(textureCoordsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) textCoods);
+
+    // GLContext::getError("drawKeysAndNoteNames 3");
 
 
     if(bNoteNamesVisible || true)
@@ -116,7 +127,7 @@ void RainbowPianoView::drawKeysAndNoteNames()
 
         glEnableVertexAttribArray(noteNameVertsLoc);
         glVertexAttribPointer(noteNameVertsLoc,2,GL_FLOAT,GL_FALSE,0,(void *)noteNameView.getVertices());
-     //   GLContext::getError("drawKeysAndNoteNames pd");
+        //   GLContext::getError("drawKeysAndNoteNames pd");
 
         glEnableVertexAttribArray(octaveNumVertsLoc);
         glVertexAttribPointer(octaveNumVertsLoc,2,GL_FLOAT,GL_FALSE,0,(void *)octaveNumView.getVertices());
@@ -128,10 +139,10 @@ void RainbowPianoView::drawKeysAndNoteNames()
 
 
     glUniform1fv(blackKeyTransLationXLoc,5,blackKeyTranslationsGL);
-   // GLContext::getError("drawKeysAndNoteNames unigd3");
+    // GLContext::getError("drawKeysAndNoteNames unigd3");
 
     glUniform4f(keysAreaBoundsLoc,keysAreaView.getStartXGL(),keysAreaView.getStartYGL(),keysAreaView.getWidthGL(),keysAreaView.getHeightGL());//TODO enable
-   //KSLOGD(TAGLOG,"keyAreaStartX %f,keyArea StartY %f ,keyAreaWidht %f,keyAreaHeight %f",keysAreaView.getStartXGL(),keysAreaView.getStartYGL(),keysAreaView.getWidthGL(),keysAreaView.getHeightGL());
+    //KSLOGD(TAGLOG,"keyAreaStartX %f,keyArea StartY %f ,keyAreaWidht %f,keyAreaHeight %f",keysAreaView.getStartXGL(),keysAreaView.getStartYGL(),keysAreaView.getWidthGL(),keysAreaView.getHeightGL());
 
     float params[] = {whiteKeyView.getWidthGL(),(float)(keyGap * 2.0)/dispMetrics.screenWidth,static_cast<float>(((whiteKeyView.getWidth() + keyGap) * 2.0)/(float)dispMetrics.screenWidth)};//TODO keyGap in GL helper coords
 
@@ -143,31 +154,36 @@ void RainbowPianoView::drawKeysAndNoteNames()
     stateLock.unlock();//TODO keep copy of keyon instead of lock around glfunction.
 
 
+    //Textures
+
+    for(int i = 0; i < 4; ++i)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D,keyTextures[i]);
+        glUniform1i(keyTexLoc+i,i);
+
+    }
 
 
-
-
-    int instanceCnt = 88 ;//88 keys
+    int instanceCnt = 88 ;//88 keys,numkeys visible
     if(bNoteNamesVisible)//TODO this is not yet done
         instanceCnt += 52 + 52;//notename + octaveNum
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, keyIndices,instanceCnt);
 
-   // GLContext::getError("drawKeysAndNoteNames 2");
-
-
+    GLContext::getError("draw Keys AndNoteNames 2");
 
     glDisable(GL_SCISSOR_TEST);//TODO do this after around correct bound in draw
 
-   // KSLOGD(TAGLOG,"drawingKeys and NoteNames");
-   // assert(false);
+    // KSLOGD(TAGLOG,"drawingKeys and NoteNames");
+    // assert(false);
 }
 
 
-void RainbowPianoView::draw() {
+void PianoView::draw() {
 
 
-    drawKeysAndNoteNames();
-   /// drawNonKeyViews();
+   // drawKeysAndNoteNames();
+    /// drawNonKeyViews();
 
     //return;
 //    //All the piano is drawn in single draw call using instanced Rendering .
@@ -180,13 +196,13 @@ void RainbowPianoView::draw() {
     //TODO no nedx
     assert(shader != 0);
     setBackgroundColor(1.0,0.0,0.0,1.0);
-   // clearBackground();
+    // clearBackground();
     int drawCost = 100;//ms
-   // KSLOGD(TAGLOG,"DrawingPiano");
+    // KSLOGD(TAGLOG,"DrawingPiano");
 
-     //Drawing
-     drawKeysAndNoteNames();
-     return;
+    //Drawing
+    drawKeysAndNoteNames();
+    return;
     //  testDraw();
     // whiteKey.printVertices();
     // setBlackKeyTranslations();///////erron in ifelse (keydown/move/all && keydow[on]=1 in onkeyaction for key or else not needed this here
@@ -247,7 +263,7 @@ void RainbowPianoView::draw() {
     KSLOGD(TAGLOG,"piano Draw Cost %d ms",drawCost);
 }
 
-void RainbowPianoView::resizeKeyCount(int whiteKeysVisibleCnt)
+void PianoView::resizeKeyCount(int whiteKeysVisibleCnt)
 {
 
     this->numWhiteKeysVisible = whiteKeysVisibleCnt;
@@ -259,13 +275,13 @@ void RainbowPianoView::resizeKeyCount(int whiteKeysVisibleCnt)
 
 }
 
-void RainbowPianoView::setBounds(float startX, float startY, float width, float height)
+void PianoView::setBounds(float startX, float startY, float width, float height)
 {
     View::setBounds(startX, startY, width, height);
     doPianoLayout();
 }
 
-void RainbowPianoView::setBlackKeyTranslations()
+void PianoView::setBlackKeyTranslations()
 {
     //5 blackkeys are rendered as translated from blackKeyView
     float whiteKeyWidth = whiteKeyView.getWidth();
@@ -285,19 +301,53 @@ void RainbowPianoView::setBlackKeyTranslations()
     }
 }
 
-void RainbowPianoView::setupTextures()
+//TODO clear textures
+void PianoView::setupTextures()
 {
 
     assert(textEngine);
     glUseProgram(shader);
 
+    //TODO clear
+    keyImages[0] = KSImageLoader::loadFromAsset("icons/white_key.png");
+    keyImages[1] = KSImageLoader::loadFromAsset("icons/white_key_ontap.png");
+    keyImages[2] = KSImageLoader::loadFromAsset("icons/black_key.png");
+    keyImages[3] = KSImageLoader::loadFromAsset("icons/black_key_ontap.png");
+
     allKeysImage = KSImageLoader::loadFromAsset("icons/allkeys.png");
-     // textEngine->getPixamapFromString("C",&allKeysTexture);
-    //getPhoto(app,&allKeysTexture);///////////make pixmap as a class and make params private
-    /////setallkeysTexture
-    //glGenBuffers(1,&texBufId);
-    //glBindBuffer(GL_PIXEL_UNPACK_BUFFER,texBufId);
-    //glBufferData(GL_PIXEL_UNPACK_BUFFER,allKeysTexture.height*allKeysTexture.width*4,(void *)allKeysTexture.pixels,GL_STATIC_COPY);
+
+    //white and black keys, TODO texutre array,cobine textures into one texture,also performance
+    glGenTextures(4,keyTextures);
+    for(int i = 0; i < 4; ++i)
+    {
+        glBindTexture(GL_TEXTURE_2D,keyTextures[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, keyImages[i].width,keyImages[i].height);//wiki commonmistakes//use glTexImage for mutable textures.//glpixelstore for way to read(pack)and write(unpack) image using this fun.
+        glTexSubImage2D(GL_TEXTURE_2D,0,0,0, keyImages[i].width,keyImages[i].height,GL_RGBA,GL_UNSIGNED_BYTE,keyImages[i].data);
+
+    }
+
+    glBindTexture(GL_TEXTURE_2D,0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
     //Texture for drawing KeyPositionModifierViewFull
     glGenTextures(1,&allKeyTex);
@@ -364,7 +414,7 @@ void RainbowPianoView::setupTextures()
 
 
     //create buffer for noteNames and upload data
-    glGenBuffers(1,&noteNamesBuf);
+   /* glGenBuffers(1,&noteNamesBuf);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER,noteNamesBuf);
     glBufferData(GL_PIXEL_UNPACK_BUFFER,totalPixelsForAllNames*sizeof(int32_t),(void *)0,GL_STATIC_DRAW);
     int32_t *data=(int32_t *)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER,0,totalPixelsForAllNames*sizeof(int32_t),GL_MAP_WRITE_BIT);
@@ -386,7 +436,7 @@ void RainbowPianoView::setupTextures()
     /*/////createTextureArrayanduploadData from above pixelUnpack Buffer*/
     //   glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
 
-    glGenTextures(1,&noteNamesTex);
+ /*   glGenTextures(1,&noteNamesTex);
     glUniform1i(126,1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY,noteNamesTex);
@@ -406,38 +456,40 @@ void RainbowPianoView::setupTextures()
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
     glBindTexture(GL_TEXTURE_2D_ARRAY,0);
 
+*/
 
 }
 
-void RainbowPianoView::prepare(AssetManager *assetManager)
+void PianoView::prepare(AssetManager *assetManager)
 {
+    //TODO async
     prepareShaders(assetManager);
     assert(shader);
     setupTextures();
     initKeyRenderIndices();
 }
 
-void RainbowPianoView::translateKeyXPosition(float factor)
+void PianoView::translateKeyXPosition(float factor)
 {
-  keyTranslateXFactor += factor;
-  float maxFactor = MAX_WHITEKEY_COUNT - numWhiteKeysVisible;
-  if(keyTranslateXFactor > maxFactor)
-  {
-      keyTranslateXFactor = maxFactor;
-      KSLOGW(TAGLOG,"Translating key Position already reached max val");
-      bMovePositionModifierRightDebug = false;
-  }
-  else if(keyTranslateXFactor < 0.0)
-  {
-      keyTranslateXFactor = 0.0;
-      bMovePositionModifierRightDebug = true;
-      KSLOGW(TAGLOG,"Translating key Position already reached min val");
-  }
+    keyTranslateXFactor += factor;
+    float maxFactor = MAX_WHITEKEY_COUNT - numWhiteKeysVisible;
+    if(keyTranslateXFactor > maxFactor)
+    {
+        keyTranslateXFactor = maxFactor;
+        KSLOGW(TAGLOG,"Translating key Position already reached max val");
+        bMovePositionModifierRightDebug = false;
+    }
+    else if(keyTranslateXFactor < 0.0)
+    {
+        keyTranslateXFactor = 0.0;
+        bMovePositionModifierRightDebug = true;
+        KSLOGW(TAGLOG,"Translating key Position already reached min val");
+    }
 
-  doPianoLayout();
+    doPianoLayout();
 }
 
-void RainbowPianoView::doPianoLayout()
+void PianoView::doPianoLayout()
 {
     //All measurements inside piano here;
     //TODO check DP?
@@ -484,7 +536,7 @@ void RainbowPianoView::doPianoLayout()
     octaveNumView.setBounds(noteNameView.getEndX(),noteNameView.getStartY(),noteNameView.getWidth(),noteNameView.getHeight());
 }
 
-void RainbowPianoView::prepareShaders(AssetManager *assetManager)
+void PianoView::prepareShaders(AssetManager *assetManager)
 {
     //TODO check intermediate shaders are cleared
     IKSStream *vertA = assetManager->openAsset("shaders/pianoShaders/vertexShader.glsl");
@@ -492,22 +544,30 @@ void RainbowPianoView::prepareShaders(AssetManager *assetManager)
     assert(vertA && fragA);
     shader = Shader::createProgram(vertA,fragA);
 
-    IKSStream *vertKeys = assetManager->openAsset("shaders/pianoShaders/keysandnotes.vert");
-    IKSStream *fragKeys = assetManager->openAsset("shaders/pianoShaders/keysandnotes.frag");
+    IKSStream *vertKeys = assetManager->openAsset("shaders/pianoShaders/keystexturedandnotes.vert");
+    IKSStream *fragKeys = assetManager->openAsset("shaders/pianoShaders/keystexturedandnotes.frag");
     assert(vertKeys && fragKeys);
 
     keysAndNoteNamesShader = Shader::createProgram(vertKeys,fragKeys);
     assert(keysAndNoteNamesShader);
 
-    //cache keysandnotes shader layout locations
+    //cache keys and notes shader layout locations
     whiteKeyVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader, "whiteKeyVerts");
     blackKeyVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"blackKeyVerts");
     noteNameVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"noteNameVerts");
     octaveNumVertsLoc = glGetAttribLocation(keysAndNoteNamesShader,"octaveNumVerts");
+    textureCoordsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"textureCoords");
     keysAreaBoundsLoc = glGetUniformLocation(keysAndNoteNamesShader,"keysAreaBounds");
+    keyTexLoc         = glGetUniformLocation(keysAndNoteNamesShader,"keyTextures");
     blackKeyTransLationXLoc = glGetUniformLocation(keysAndNoteNamesShader,"blackKeyTransLationX");
     paramsLoc = glGetUniformLocation(keysAndNoteNamesShader ,"params");
     isKeyOnLoc = glGetUniformLocation(keysAndNoteNamesShader,"isKeyOn");
+
+    GLContext::getError("get Shader Locations");
+
+    KSLOGD(TAGLOG, "btextuers locations %d %d %d %d %d %d %d %d %d %d", whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc
+    ,textureCoordsLoc,keysAreaBoundsLoc,keyTexLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc);
+
 
 
     //TODO debug
@@ -519,80 +579,80 @@ void RainbowPianoView::prepareShaders(AssetManager *assetManager)
 
 }
 
-EKeyName RainbowPianoView::getKeyNoAtLoc(float x, float y)
+EKeyName PianoView::getKeyNoAtLoc(float x, float y)
 {
 
-        EKeyType keyType{EKeyType::BASE};
-        EKeyNameBase keyBaseName;
-        int keyNo;
+    EKeyType keyType{EKeyType::BASE};
+    EKeyNameBase keyBaseName;
+    int keyNo;
 
-        /*
-         * get keyX relative to origin,as if firstkey is at origin
-         * (x,y) are in screenCoords
+    /*
+     * get keyX relative to origin,as if firstkey is at origin
+     * (x,y) are in screenCoords
+     */
+    float keyX = x + globalKeyTranslateX - startX;
+
+    //gives the whitekey no from 0-51
+    keyNo = keyX/(whiteKeyView.getWidth() + keyGap );
+
+    //convert A0 to C1 as octave start
+    int realOctaveNum = (keyNo + 5) / 7 ;
+
+    //get key nos 0-6;within octaveNum; a - g
+    keyBaseName = static_cast<EKeyNameBase>(keyNo % 7);
+
+    if(y <= blackKeyView.getEndY() && y >= blackKeyView.getStartY())
+    {
+        //could be a black key
+
+        //get startX of this white key relative to origin;
+        float keyNoStartX = keyNo * (whiteKeyView.getWidth() + keyGap);
+
+        //TODO should keyGap be considered?
+        if (keyX <= keyNoStartX + blackKeyView.getWidth() / 2)
+        {
+            //because C and F don't have flats
+            if (keyBaseName != EKeyNameBase::C && keyBaseName != EKeyNameBase::F)
+            {keyType = EKeyType::FLAT;}
+        }
+
+        else if (keyX >= (keyNoStartX + whiteKeyView.getWidth() - blackKeyView.getWidth() / 2))
+        {
+            //cus B and E dont have sharps
+            if (keyBaseName != EKeyNameBase::B && keyBaseName != EKeyNameBase::E)
+            {keyType = EKeyType::SHARP;}
+        }
+    }
+
+
+    /*
+     *     //TODO check why below is happening and remove //becase of screen and window size mismatch we get 88 key
+        if(name < 0 )
+        name = 0;
+        else if(name > 87)
+        name = 87;
+        //TODO
          */
-        float keyX = x + globalKeyTranslateX - startX;
+    EKeyName res =  getKeyName(keyBaseName, realOctaveNum, keyType);
 
-        //gives the whitekey no from 0-51
-        keyNo = keyX/(whiteKeyView.getWidth() + keyGap );
+    if(res < 0)
+    {
+        KSLOGW("RainbowPiano","getKeyAtLocation return invalid keyNo %d",res);
+        res = static_cast<EKeyName>(0);
+    }
+    else if(res > PIANO_MAX_KEY_COUNT -1)
+    {
+        KSLOGW("RainbowPiano","getKeyAtLocation return invalid keyNo %d",res);
+        res = static_cast<EKeyName>(PIANO_MAX_KEY_COUNT - 1);
+    }
 
-        //convert A0 to C1 as octave start
-        int realOctaveNum = (keyNo + 5) / 7 ;
-
-        //get key nos 0-6;within octaveNum; a - g
-        keyBaseName = static_cast<EKeyNameBase>(keyNo % 7);
-
-        if(y <= blackKeyView.getEndY() && y >= blackKeyView.getStartY())
-        {
-            //could be a black key
-
-            //get startX of this white key relative to origin;
-            float keyNoStartX = keyNo * (whiteKeyView.getWidth() + keyGap);
-
-            //TODO should keyGap be considered?
-            if (keyX <= keyNoStartX + blackKeyView.getWidth() / 2)
-            {
-                //because C and F don't have flats
-                if (keyBaseName != EKeyNameBase::C && keyBaseName != EKeyNameBase::F)
-                {keyType = EKeyType::FLAT;}
-            }
-
-            else if (keyX >= (keyNoStartX + whiteKeyView.getWidth() - blackKeyView.getWidth() / 2))
-            {
-                //cus B and E dont have sharps
-                if (keyBaseName != EKeyNameBase::B && keyBaseName != EKeyNameBase::E)
-                {keyType = EKeyType::SHARP;}
-            }
-        }
-
-
-        /*
-         *     //TODO check why below is happening and remove //becase of screen and window size mismatch we get 88 key
-            if(name < 0 )
-            name = 0;
-            else if(name > 87)
-            name = 87;
-            //TODO
-             */
-        EKeyName res =  getKeyName(keyBaseName, realOctaveNum, keyType);
-
-        if(res < 0)
-        {
-            KSLOGW("RainbowPiano","getKeyAtLocation return invalid keyNo %d",res);
-             res = static_cast<EKeyName>(0);
-        }
-        else if(res > PIANO_MAX_KEY_COUNT -1)
-        {
-            KSLOGW("RainbowPiano","getKeyAtLocation return invalid keyNo %d",res);
-             res = static_cast<EKeyName>(PIANO_MAX_KEY_COUNT - 1);
-        }
-
-        return res;
+    return res;
 }
 
 /***IPianoController Impl***/
 
 
-KSFORCEINLINE void RainbowPianoView::setKeyState(const EKeyName name, const EKeyState state)
+KSFORCEINLINE void PianoView::setKeyState(const EKeyName name, const EKeyState state)
 {
     //TODO name shouldn't be invalid or out of bounds handled this in upper layer calling this func
     //TODO thread safety always.
@@ -601,7 +661,7 @@ KSFORCEINLINE void RainbowPianoView::setKeyState(const EKeyName name, const EKey
 }
 
 
-void RainbowPianoView::setKeysStates(const std::vector<KeyStateInfo> states)
+void PianoView::setKeysStates(const std::vector<KeyStateInfo> states)
 {
     for(auto &state : states)
     {
@@ -609,7 +669,7 @@ void RainbowPianoView::setKeysStates(const std::vector<KeyStateInfo> states)
     }
 }
 
-void RainbowPianoView::initKeyRenderIndices()
+void PianoView::initKeyRenderIndices()
 {
     //TODO can compute value although this is fast;
     //for rendering white keys 0-51 ,black keys 52-87 in order
@@ -725,4 +785,140 @@ void RainbowPianoView::initKeyRenderIndices()
 }
 
 
+
+//Touch Listener
+
+bool PianoTouchListener::onTouch(const ks::MotionEvent &event, View *view)
+{
+//TODO not using this now
+    int32_t index = event.getPointerIndex();
+    int32_t id  = event.getPointerId(index);
+    float pointX = event.getX(index);
+    float pointY = event.getY(index);
+    KSLOGD(TAGLOG,"PianoSynthNode on Touch x %f y %f ",pointX,pointY);
+    PianoView *piano = static_cast<PianoView *>(view);
+
+
+    //TODO maybe need to check touch event history cause when swipes speed across screen some ponts may be missiong
+    //therfore some keys may not be played or events may be repeated check;
+    assert(piano);
+    if(piano->keysAreaView.isPointInside(pointX,pointY))
+    {    //Touch action on keys
+        KSLOGD(TAGLOG,"touching keysArea");
+        EKeyName keyName = piano->getKeyNoAtLoc(pointX,pointY);
+        piano->controller->setKeyState(keyName,EKeyState::KEYSTATE_ON);
+
+        return true;
+    }
+    return false;
+}
+
+bool PianoTouchListener::onTouchDown(const float &x, const float &y, const ks::TouchID &id,const bool &isPrimary)
+{
+    PianoView* piano = reinterpret_cast<PianoView *>(this->view);
+    if(piano->keysAreaView.isPointInside(x,y))
+    {    //Touch action on keys
+        KSLOGD(TAGLOG,"touching keysArea");
+        EKeyName keyName = piano->getKeyNoAtLoc(x,y);
+        piano->controller->setKeyState(keyName,EKeyState::KEYSTATE_ON);
+        previousPointedKey[id] = keyName;
+
+        return true;
+    }
+    else
+    {//TODO
+
+    }
+    return false;
+
+    //return TouchListener::onTouchDown(x, y, id);
+}
+
+bool PianoTouchListener::onTouchUp(const float &x, const float &y, const ks::TouchID &id,const bool &isLast)
+{
+
+    PianoView* piano = reinterpret_cast<PianoView *>(this->view);
+    if(piano->keysAreaView.isPointInside(x,y))
+    {    //Touch action on keys
+        KSLOGD(TAGLOG,"touching keysArea action up");
+        EKeyName keyName = piano->getKeyNoAtLoc(x,y);
+        piano->getController()->setKeyState(keyName,EKeyState::KEYSTATE_OFF);
+
+        //what if touchdown/up not same key?
+        previousPointedKey[id] = EKeyName::INVALID;
+
+        return true;
+    }
+    else
+    {//TODO
+        KSLOGE(TAGLOG,"error");
+    }
+    return false;
+    //return TouchListener::onTouchUp(x, y, id, isLast);
+}
+
+bool PianoTouchListener::onMove(const float &x, const float &y, const ks::TouchID &id)
+{
+    PianoView* piano = reinterpret_cast<PianoView *>(this->view);
+
+    if(piano->keysAreaView.isPointInside(x,y))
+    {
+        //For some reasoin this is > 87 check with surface dimentions and dispmetric for now handled in getKeyNoAtLoc
+        EKeyName keyName = piano->getKeyNoAtLoc(x,y);
+        if(previousPointedKey[id] != keyName)
+        {
+            //swiping from one key to other
+            //combine setKeyStates to one call,also better setKey on first and off next for Audio latency
+            if(previousPointedKey[id] != EKeyName::INVALID)
+                piano->controller->setKeyState(previousPointedKey[id],EKeyState::KEYSTATE_OFF);
+
+            previousPointedKey[id] = keyName;
+            piano->controller->setKeyState(keyName,EKeyState::KEYSTATE_ON);
+            return true;
+
+        }
+        else
+        {
+            //same key already on,so nothing to do
+            return true;
+        }
+    }
+    else
+    {
+        //TODO
+
+        //Move out of the keys area but same finger touch caused keyon before;
+        if(previousPointedKey[id] != EKeyName::INVALID)
+        {
+            piano->controller->setKeyState(previousPointedKey[id],EKeyState::KEYSTATE_OFF);
+            previousPointedKey[id] = EKeyName::INVALID;
+            //TODO should return //false or handle other slider for this touch?hover?
+            //shoudl remove id from touchIds[] ?
+            //
+        }
+    }
+
+    return false;
+}
+
+
+bool PianoTouchListener::onHoverExit(const ks::TouchID &id)
+{
+    //TODO also check aptly inside keys area of sliders
+    //Moved out of piano
+
+    PianoView* piano = reinterpret_cast<PianoView *>(this->view);
+
+    if(previousPointedKey[id] != EKeyName::INVALID)
+    {
+        piano->getController()->setKeyState(previousPointedKey[id],EKeyState::KEYSTATE_OFF);
+        previousPointedKey[id] = EKeyName::INVALID;
+    }
+
+    return false;
+}
+
+
+
+//  return TouchListener::onMove(x, y, id);
 

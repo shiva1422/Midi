@@ -6,6 +6,7 @@
 #include "PianoApplication.h"
 #include "UI/RainbowPianoTouchListener.h"
 #include "GN/IMediaNode.h"
+#include "UI/PianoView.h"
 
 
 using namespace ks;
@@ -22,7 +23,7 @@ void PianoApplication::resizeUI()
 {
     View *v = static_cast<View *>(renderer.getContent());
     //Should resize VIews automatically TODO but for now only PianoView so resize it
-    v->setBounds(displayMetrics.screenWidth*0/4, displayMetrics.screenHeight/4, displayMetrics.screenWidth, displayMetrics.screenHeight/2);
+    v->setBounds(displayMetrics.screenWidth*0/4, displayMetrics.screenHeight * 0/4, displayMetrics.screenWidth, displayMetrics.screenHeight *4.0/4);
 
 
 }
@@ -37,11 +38,11 @@ void PianoApplication::onCreate()
     textEngine.init();
     //pianoVew = new RainbowPianoView(400, 200, 400, 400, &textEngine);//TODO textEngine Independent of PianoView
     //pianoVew = new RainbowPianoView(0, 0, displayMetrics.screenWidth, displayMetrics.screenHeight, &textEngine);//TODO textEngine Independent of PianoView
-    pianoVew = new RainbowPianoView(0, displayMetrics.screenHeight/2, displayMetrics.screenWidth, displayMetrics.screenHeight/2, &textEngine);//TODO textEngine Independent of PianoView
+    pianoVew = new PianoView(0, displayMetrics.screenHeight/2, displayMetrics.screenWidth, displayMetrics.screenHeight/2, &textEngine);//TODO textEngine Independent of PianoView
    // pianoVew->setShaderProgram(Shader::createProgram(vertA,fragA));
     pianoVew->prepare(this);
 
-    pianoVew->setTouchListener(new RainbowPianoTouchListener());
+    pianoVew->setTouchListener(new PianoTouchListener());
 
    // pianoVew->setBounds(0,0,1000,500);
     pianoVew->setBackgroundColor(0.0,0.0,0.,1.0);
