@@ -16,12 +16,19 @@
 #include "../Piano/PianoCore.h"
 #include "../Piano/IPianoController.h"
 #include <mutex>
+#include <KSUI/GL/GLImageView.h>
+#include <KSUI/GL/RectView.h>
 
 
 #define MIN_WHITEKEY_COUNT 7
 #define MAX_WHITEKEY_COUNT 52
 #define DEFAULT_WHITEKEY_COUNT 52
 
+/*
+    * Draw keyboard using openGL instanced rendering.
+    * Total Keys 88 ,whitekeys - 52,blackkeys -36
+    * A0 - C8
+    */
 
 class PianoView : public View, public IPianoController{
 
@@ -94,7 +101,7 @@ private:
 
     //locations for above shader
     GLint whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc,keysAreaBoundsLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,keyGapXLoc,
-            textureCoordsLoc;
+            textureCoordsLoc,noteNamesTexLoc, allKeyTexLoc,keyCountVertLoc,allKeyVertsLoc;
 
     //2 textures for each one off and one on.
     GLint keyTexLoc;
@@ -114,9 +121,9 @@ private:
 private:
 
     //Textures
-    KSImage allKeysImage;
+    KSImage* allKeysImage;
 
-    KSImage keyImages[4];//black key, blackKeyTap,whiteKey,whiteKeyTap;
+    KSImage* keyImages[4];//black key, blackKeyTap,whiteKey,whiteKeyTap;
 
     GLuint keyTextures[4];//
 
@@ -141,13 +148,19 @@ private:
 
     GLView whiteKeyView,blackKeyView;//first white key bounds.
 
-    GLView keySizeIncView,keyCountDecView;
+    GLView keySizeIncView;
 
-    GLView keyPositionModifierView ,keyPositionModifierViewFull;
+    GLView  allKeysView;
 
     GLView noteNameView;
 
     GLView octaveNumView;
+
+
+    //
+    GLImageView keyCountDecView,keyCountIncView,keyPositionRightView,keyPositionLeftView;
+    GLImageView topFrameView,midFrameView;
+    RectView keyPositionModifierView;
 
 
 
@@ -161,7 +174,7 @@ private:
 
     float keyCountModifierTranlations[2];
     //WhiteKeys
-    int numWhiteKeysVisible = 10;//MAX_WHITEKEY_COUNT;
+    int numWhiteKeysVisible = 24;
 
     float whiteKeyWidth = 50;//px
 
@@ -174,7 +187,7 @@ private:
     float globalKeyTranslateX = 0;//in pixels
 
     //num of times(float) white key width the translate  will be calculated from;like when moving keys using positionmodifier
-    float keyTranslateXFactor = 0.0;
+    float keyTranslateXFactor = 20.0;
 
     float keyPositionModifierOffset = 0.0;//The offset of KeyPositionModifierView from keyPositionModifierViewFull.startX(); calculated from keyTranslateXFactor
 

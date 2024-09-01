@@ -23,7 +23,7 @@ void PianoApplication::resizeUI()
 {
     View *v = static_cast<View *>(renderer.getContent());
     //Should resize VIews automatically TODO but for now only PianoView so resize it
-    v->setBounds(displayMetrics.screenWidth*0/4, displayMetrics.screenHeight * 0/4, displayMetrics.screenWidth, displayMetrics.screenHeight *4.0/4);
+    v->setBounds(displayMetrics.screenWidth*0/4, displayMetrics.screenHeight * 20.0/100, displayMetrics.screenWidth, displayMetrics.screenHeight *80.0/100);
 
 
 }
@@ -32,6 +32,8 @@ void PianoApplication::resizeUI()
 void PianoApplication::onCreate()
 {
     KSApplication::onCreate();
+
+    KSLOGV(appName.c_str(),"prepare Shaders %d", Shader::prepareShaders(this));//TODO move to application/Graphics aptly
 
   //  renderer.setBackGroundColor(1.0,1.0,0.0,1.0);
     textEngine.setDisplayMetrics(displayMetrics);
@@ -273,6 +275,10 @@ void PianoApplication::onSaveState()
 void PianoApplication::onInputChange()
 {
     KSApplication::onInputChange();
+}
+
+void PianoApplication::createContentView() {
+
 }
 
 

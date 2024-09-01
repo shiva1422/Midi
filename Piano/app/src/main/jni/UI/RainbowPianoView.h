@@ -117,7 +117,7 @@ private:
 private:
 
     //Textures
-    KSImage allKeysImage;
+    KSImage *allKeysImage;
 
     GLuint allKeyTex = 0 ,noteNamesTex = 0 , noteNamesBuf = 0;
 

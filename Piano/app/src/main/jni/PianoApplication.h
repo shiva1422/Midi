@@ -7,6 +7,7 @@
 
 
 #include <KSApp/KSApplication.h>
+#include <KSUI/ViewGroup.h>
 #include "Codec/WavDecoder.h"
 
 #include "Audio/SLESAudioPlayer.h"
@@ -75,7 +76,14 @@ protected:
 
 private:
 
+    void createContentView();
+
+private:
+
     PianoSynthNode piano;
+    ViewGroup *contentView = nullptr;
+    ViewGroup *midFrame = nullptr;
+    GLImageView *topFrame = nullptr;
     PianoView *pianoVew = nullptr;
 
     MidiPlayer midiPlayer;

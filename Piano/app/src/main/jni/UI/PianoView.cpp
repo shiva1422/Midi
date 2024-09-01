@@ -65,16 +65,14 @@ void PianoView::clearBackground()
 
 void PianoView::testDraw()
 {
-    keyPositionModifierViewFull.setBackgroundColor(1.0,0.2,1.0,1.0);
+    allKeysView.setBackgroundColor(1.0, 0.2, 1.0, 1.0);
     keyPositionModifierView.setBackgroundColor(0.0,0.4,1.0,1.0);
-    keyCountDecView.setBackgroundColor(0.4, 1.0, 0.5, 1.0);
     noteNameView.setBackgroundColor(1.0,0.0,0.0,1.0);
     octaveNumView.setBackgroundColor(0.0,1.0,1.0,1.0);
     whiteKeyView.setBackgroundColor(1.0,1.0,1.0,1.0);
     blackKeyView.setBackgroundColor(0.0,0.0,0.0,1.0);
-    keyPositionModifierViewFull.clearBackground();
+    allKeysView.clearBackground();
     keyPositionModifierView.clearBackground();
-    keyCountDecView.clearBackground();
     whiteKeyView.clearBackground();
     blackKeyView.clearBackground();
     noteNameView.clearBackground();
@@ -89,7 +87,7 @@ void PianoView::drawNonKeyViews()
 
 
 
-//TODO VAO
+//TODO VAO and UBO,uniform buffers.
 void PianoView::drawKeysAndNoteNames()
 {
     /*
@@ -102,10 +100,12 @@ void PianoView::drawKeysAndNoteNames()
 //    else
 //      translateKeyXPosition(-0.05);
 //TODO use Vertex and Uniform buffers and VertexArrays
+    //glEnable(GL_BLEND);
+    //glEnable(GL_SCISSOR_TEST);
+   // glScissor(getStartX(),getStartY() - getHeight(),getWidth(),getHeight());
 
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(keysAreaView.getStartX(),dispMetrics.screenHeight - keysAreaView.getStartY() - keysAreaView.getHeight(),keysAreaView.getWidth(),keysAreaView.getHeight());
-
+   //keysAreaView.setBackgroundColor(0.0,0.0,0.0,1.0);
+  // keysAreaView.clearBackground();
     //GLContext::getError("drawKeysAndNoteNames0");
     glUseProgram(keysAndNoteNamesShader);
     // GLContext::getError("drawKeysAndNoteNames 1");
@@ -119,10 +119,17 @@ void PianoView::drawKeysAndNoteNames()
     glEnableVertexAttribArray(textureCoordsLoc);
     glVertexAttribPointer(textureCoordsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) textCoods);
 
+    glEnableVertexAttribArray(allKeyVertsLoc);
+    glVertexAttribPointer(allKeyVertsLoc, 2, GL_FLOAT,GL_FALSE,0,(void *)allKeysView.getVertices());
+
+    float *v = allKeysView.getVertices();
+    KSLOGD(TAGLOG, "boombass (%f,%f) (%f %f) (%f,%f) (%f %f)",v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7]);
+
+
     // GLContext::getError("drawKeysAndNoteNames 3");
 
-
-    if(bNoteNamesVisible || true)
+    bNoteNamesVisible = true;;//debug only
+    if(bNoteNamesVisible)
     {
 
         glEnableVertexAttribArray(noteNameVertsLoc);
@@ -163,22 +170,42 @@ void PianoView::drawKeysAndNoteNames()
         glUniform1i(keyTexLoc+i,i);
 
     }
+    glActiveTexture(GL_TEXTURE0 + 4);
+    glBindTexture(GL_TEXTURE_2D_ARRAY,noteNamesTex);
+    glUniform1i(noteNamesTexLoc,4);
 
+    glActiveTexture(GL_TEXTURE0 + 5);
+    glBindTexture(GL_TEXTURE_2D,allKeyTex);
+    glUniform1i(allKeyTexLoc,5);
 
-    int instanceCnt = 88 ;//88 keys,numkeys visible
+    // can improve performance by TODO note names and number can be draw in same time as white key,see frag shader
+    int instanceCnt = 88 + 1 ;//88 keys  ,allkeys;
     if(bNoteNamesVisible)//TODO this is not yet done
         instanceCnt += 52 + 52;//notename + octaveNum
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, keyIndices,instanceCnt);
 
+
     GLContext::getError("draw Keys AndNoteNames 2");
 
-    glDisable(GL_SCISSOR_TEST);//TODO do this after around correct bound in draw
+    glDisableVertexAttribArray(whiteKeyVertsLoc);
+    glDisableVertexAttribArray(blackKeyVertsLoc);
+    glDisableVertexAttribArray(textureCoordsLoc);
+    glDisableVertexAttribArray(allKeyVertsLoc);
+    glDisableVertexAttribArray(noteNameVertsLoc);
+    glDisableVertexAttribArray(octaveNumVertsLoc);
 
+
+
+
+
+    //glDisable(GL_SCISSOR_TEST);//TODO do this after around correct bound in draw
+
+    //clear disable
     // KSLOGD(TAGLOG,"drawingKeys and NoteNames");
     // assert(false);
 }
 
-
+//can improve performance by TODO instead of drawing every frame, draw to frame buffer once and then draw only when there is a change
 void PianoView::draw() {
 
 
@@ -195,72 +222,44 @@ void PianoView::draw() {
 
     //TODO no nedx
     assert(shader != 0);
-    setBackgroundColor(1.0,0.0,0.0,1.0);
-    // clearBackground();
+    //setBackgroundColor(1.0,0.0,0.0,1.0);
+   // clearBackground();
     int drawCost = 100;//ms
     // KSLOGD(TAGLOG,"DrawingPiano");
 
+  //  glEnable(GL_BLEND);
+  //  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+   topFrameView.draw();
+  // topFrameView.setBackgroundColor(1.0,1.0,1.0,1.0);
+   //topFrameView.clearBackground();
+    midFrameView.draw();
+   // midFrameView.setBackgroundColor(1.0,1.0,1.0,1.0);
+   // midFrameView.clearBackground();
     //Drawing
     drawKeysAndNoteNames();
-    return;
-    //  testDraw();
-    // whiteKey.printVertices();
-    // setBlackKeyTranslations();///////erron in ifelse (keydown/move/all && keydow[on]=1 in onkeyaction for key or else not needed this here
 
-    glUseProgram(shader);
-    //TODO
-    float displayParameters[]={(float) dispMetrics.screenWidth,(float)dispMetrics.screenHeight,static_cast<float>(whiteKeyView.getWidth()),static_cast<float>(keyGap),1};//1 padheight remove
+    //below four combine into an actionBar view;
+    //keyPositionModifierView.setBackgroundColor(1.0,0.0,1.0,0.2);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0,(void *) whiteKeyView.getVertices());
+    keyCountDecView.draw();
+    keyCountIncView.draw();
+    keyPositionLeftView.draw();
+    keyPositionRightView.draw();
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *) blackKeyView.getVertices());
-
-    glUniform1fv(5,5,displayParameters);
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void *) keyPositionModifierViewFull.getVertices());//TODO
-
-    // setBlackKeyTranslations();
-    glUniform1fv(10,5,blackKeyTranslations);
-    glUniform1i(120,0);//drawtype
-
-    //Key Position and size modifiers
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, (void *) keyCountDecView.getVertices());
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 0, (void *) keyPositionModifierView.getVertices());
-    glUniform1fv(122,2,keyCountModifierTranlations);
-
-    /////keyPOSIOTN AND SIZE MODIFIERS
-    float textCood[]={0,1,1,1,1,0,0,0};/////////redo
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6,2,GL_FLOAT,GL_FALSE,0,(void *)textCood);
-    glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7,2,GL_FLOAT,GL_FALSE,0,keyPositionModifierViewFull.getVertices());
-    glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8,2,GL_FLOAT,GL_FALSE,0,(void *)noteNameView.getVertices());
-    glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9,2,GL_FLOAT,GL_FALSE,0,(void *)octaveNumView.getVertices());
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D,allKeyTex);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D_ARRAY,noteNamesTex);
-
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, keyIndices,196);//keys background  and keySize and position changers' and allkeys bar-92  + 52 note names + 52 octaveNum
-    // glDrawArraysInstanced(GL_TRIANGLE_FAN,0,4,145);//no indices required
-
-    glUniform1i(120,1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_SHORT,keyIndices);//drawing positionchanger
+    keyPositionModifierView.setBackgroundColor(0.0,0.0,0.0,0.7);
+    keyPositionModifierView.draw();
     glDisable(GL_BLEND);
 
-    //Drawing End
-    glDisable(GL_SCISSOR_TEST);
 
-    KSLOGD(TAGLOG,"piano Draw Cost %d ms",drawCost);
+    //testView.draw();
+    // allKeysView.draw();
+   // keyCountDecImageView->clearBackground();
+
+    return;
+
 }
 
 void PianoView::resizeKeyCount(int whiteKeysVisibleCnt)
@@ -277,13 +276,13 @@ void PianoView::resizeKeyCount(int whiteKeysVisibleCnt)
 
 void PianoView::setBounds(float startX, float startY, float width, float height)
 {
-    View::setBounds(startX, startY, width, height);
+    View::setBounds(startX, startY, width, height);//TODO if height falls out of the screen adjust bounds here.
     doPianoLayout();
 }
 
 void PianoView::setBlackKeyTranslations()
 {
-    //5 blackkeys are rendered as translated from blackKeyView
+    //5 blackkeys are rendered as translated from blackKeyView(firstone)
     float whiteKeyWidth = whiteKeyView.getWidth();
     float tempDif   =   (blackKeyView.getWidth() + keyGap)/2.0;
     blackKeyTranslations[0] = (whiteKeyWidth + keyGap)-tempDif;//a#
@@ -309,59 +308,49 @@ void PianoView::setupTextures()
     glUseProgram(shader);
 
     //TODO clear
-    keyImages[0] = KSImageLoader::loadFromAsset("icons/white_key.png");
-    keyImages[1] = KSImageLoader::loadFromAsset("icons/white_key_ontap.png");
-    keyImages[2] = KSImageLoader::loadFromAsset("icons/black_key.png");
-    keyImages[3] = KSImageLoader::loadFromAsset("icons/black_key_ontap.png");
-
-    allKeysImage = KSImageLoader::loadFromAsset("icons/allkeys.png");
+    keyImages[0] = KSImageLoader::loadFromAsset("icons/white_key1.png");
+    keyImages[1] = KSImageLoader::loadFromAsset("icons/white_key1_ontap.png");
+    keyImages[2] = KSImageLoader::loadFromAsset("icons/black_key1.png");
+    keyImages[3] = KSImageLoader::loadFromAsset("icons/black_key1_ontap.png");
+    allKeysImage = KSImageLoader::loadFromAsset("icons/allkeys.jpg");
 
     //white and black keys, TODO texutre array,cobine textures into one texture,also performance
     glGenTextures(4,keyTextures);
     for(int i = 0; i < 4; ++i)
     {
-        glBindTexture(GL_TEXTURE_2D,keyTextures[i]);
+        if(keyImages[i])
+        {
+            glBindTexture(GL_TEXTURE_2D,keyTextures[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, keyImages[i]->width,keyImages[i]->height);//wiki commonmistakes//use glTexImage for mutable textures.//glpixelstore for way to read(pack)and write(unpack) image using this fun.
+            glTexSubImage2D(GL_TEXTURE_2D,0,0,0, keyImages[i]->width,keyImages[i]->height,GL_RGBA,GL_UNSIGNED_BYTE,keyImages[i]->data);
+          //  delete keyImages[i];
+            //keyImages[i] = nullptr;
+        }else
+        {
+            KSLOGE(TAGLOG,"error loading keyTexture %d",keyTextures[i]);
+        }
+
+    }
+
+    if(allKeysImage)
+    {
+        //Texture for drawing KeyPositionModifierViewFull
+        glGenTextures(1,&allKeyTex);
+        glBindTexture(GL_TEXTURE_2D,allKeyTex);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, keyImages[i].width,keyImages[i].height);//wiki commonmistakes//use glTexImage for mutable textures.//glpixelstore for way to read(pack)and write(unpack) image using this fun.
-        glTexSubImage2D(GL_TEXTURE_2D,0,0,0, keyImages[i].width,keyImages[i].height,GL_RGBA,GL_UNSIGNED_BYTE,keyImages[i].data);
-
+        glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,allKeysImage->width,allKeysImage->height);
+        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,allKeysImage->width,allKeysImage->height,GL_RGBA,GL_UNSIGNED_BYTE,allKeysImage->data);
+        //delete allKeysImage;
+       // allKeysImage = nullptr;
     }
 
-    glBindTexture(GL_TEXTURE_2D,0);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-    //Texture for drawing KeyPositionModifierViewFull
-    glGenTextures(1,&allKeyTex);
-    glUniform1i(125,0);//setting sample unit to 0texture in fragmentshader tex
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D,allKeyTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,allKeysImage.width,allKeysImage.height);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,allKeysImage.width,allKeysImage.height,GL_RGBA,GL_UNSIGNED_BYTE,allKeysImage.data);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
-    glBindTexture(GL_TEXTURE_2D,0);
 
     //set note names texture as texturearray2d /a to g and 1 to 7 and may be # ,+ and -
     //getPixmap for each name a-g ang 1-7 and #
@@ -369,14 +358,14 @@ void PianoView::setupTextures()
     char noteName[2];
     noteName[1]='\0';//to make as string;
     uint64_t totalPixelsForAllNames = 0;
-    const int totalnoteNameImages = 19;//TOTATAL IMAGES FOR  NOTE NAMES A-G and  # AND + AND -
+    const int totalnoteNameImages = 17;//TOTATAL IMAGES FOR  NOTE NAMES,0-7, A-G and  # AND
 
 
     for(int i=0;i<totalnoteNameImages;i++)
     {
         if(i<7)
         {
-            noteName[0]=char(65+i);
+            noteName[0] = char(65+i);
         }
         else if(i<16)
         {
@@ -386,14 +375,7 @@ void PianoView::setupTextures()
         {
             noteName[0] = '#';
         }
-        else if(i==17)
-        {
-            noteName[0] = '_';
-        }
-        else if(i==18)
-        {
-            noteName[0] = '+';
-        }
+
         textEngine->getPixamapFromString(noteName,&this->noteNames[i]);
 
         if(maxHeight < this->noteNames[i].height)
@@ -401,62 +383,37 @@ void PianoView::setupTextures()
         if(maxWidth < this->noteNames[i].width)
             maxWidth = this->noteNames[i].width;
         totalPixelsForAllNames += this->noteNames[i].height*this->noteNames[i].width;
-        KSLOGD(TAGLOG,"the string is %s and obtained the bitmap",noteName);
+        //KSLOGD(TAGLOG,"the string is %s and obtained the bitmap toalPxel %ld",noteName,totalPixelsForAllNames);
 
     }
 
-    /* glActiveTexture(GL_TEXTURE0);
-     glBindTexture(GL_TEXTURE_2D,texId);
-     glTexSubImage2D(GL_TEXTURE_2D,0,0,0,noteNames[1].width,noteNames[1].height,GL_RGBA,GL_UNSIGNED_BYTE,noteNames[1].pixels);
-     glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
-     glBindTexture(GL_TEXTURE_2D,0);*/
-
-
-
-    //create buffer for noteNames and upload data
-   /* glGenBuffers(1,&noteNamesBuf);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER,noteNamesBuf);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER,totalPixelsForAllNames*sizeof(int32_t),(void *)0,GL_STATIC_DRAW);
-    int32_t *data=(int32_t *)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER,0,totalPixelsForAllNames*sizeof(int32_t),GL_MAP_WRITE_BIT);
-    int32_t offset=0;
-    int32_t totalPixels=0;
-    if(data)
-    {
-        for(int i=0;i<totalnoteNameImages;i++)
-        {
-            totalPixels=noteNames[i].height*noteNames[i].width;
-            memcpy(data+offset,noteNames[i].pixels,totalPixels*sizeof(int32_t));
-            offset+=totalPixels;
-        }
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-    }
-    else
-        KSLOGE(TAGLOG,"error mapping buffer for noteNames");
-    /*/////createTextureArrayanduploadData from above pixelUnpack Buffer*/
-    //   glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
-
- /*   glGenTextures(1,&noteNamesTex);
-    glUniform1i(126,1);
-    glActiveTexture(GL_TEXTURE1);
+    glGenTextures(1,&noteNamesTex);
     glBindTexture(GL_TEXTURE_2D_ARRAY,noteNamesTex);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY,1,GL_RGBA8,maxWidth,maxHeight,totalnoteNameImages);
-    offset=0;
-    for(int i=0;i<totalnoteNameImages;i++)
+    for(int i = 0; i < totalnoteNameImages; i++)
     {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,(maxWidth-noteNames[i].width)/2,(maxHeight-noteNames[i].height)/2,i,noteNames[i].width,noteNames[i].height,1,GL_RGBA,GL_UNSIGNED_BYTE,(void *)offset);
-        offset+=noteNames[i].width*noteNames[i].height*4;
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,(maxWidth-noteNames[i].width)/2,(maxHeight-noteNames[i].height)/2,i,noteNames[i].width,noteNames[i].height,1,GL_RGBA,GL_UNSIGNED_BYTE,(void *)noteNames[i].pixels);
         //glTexImage3D(GL_TEXTURE_2D_ARRAY,0,GL_RGBA,noteNames[1].width,noteNames[1].height,i,0,GL_RGBA,GL_UNSIGNED_BYTE,(void *)(noteNames[0].width*noteNames[0].height*4));
     }
 
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
+    glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_2D_ARRAY,0);
 
-*/
+    keyCountDecView.setImage("icons/test.png");
+    keyCountIncView.setImage("icons/test.png");
+    keyPositionLeftView.setImage("icons/test.png");
+    keyPositionRightView.setImage("icons/test.png");
+    topFrameView.setImage("icons/midframe2.png");//This should actually be ouside the PianoView;
+    midFrameView.setImage("icons/midframe.jpg");
+    keyPositionModifierView.setBackgroundColor(0.0,0.0,0.0,0.4);
+
+
+
+    KSLOGE(TAGLOG, "Setup Textures Complete");
 
 }
 
@@ -508,11 +465,17 @@ void PianoView::doPianoLayout()
 
     //TODO add methods to setBounds in DP in View
 
-    keyCountDecView.setBounds(startX, startY, sizeModifierWidthInPX, topNonKeyHeight);
-    keyPositionModifierViewFull.setBounds(keyCountDecView.getEndX(), startY, width - 2.0 * keyCountDecView.getWidth(), keyCountDecView.getHeight());
+    allKeysView.setBounds(startX + width * 20.0/100, startY, width * 60.0/100, topNonKeyHeight);
+    keyCountDecView.setBounds(allKeysView.getStartX()-sizeModifierWidthInPX, allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
+    keyCountIncView.setBounds(allKeysView.getEndX(),allKeysView.getStartY(),keyCountDecView.getWidth(),keyCountDecView.getHeight());
+    keyPositionLeftView.setBounds(keyCountDecView.getStartX()-keyCountDecView.getWidth(), allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
+    keyPositionRightView.setBounds(keyCountIncView.getStartX()+keyCountIncView.getWidth(), allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
+
+
+
     //
-    keyPositionModifierOffset = keyTranslateXFactor * ((float)keyPositionModifierViewFull.getWidth())/(MAX_WHITEKEY_COUNT);
-    keyPositionModifierView.setBounds(keyPositionModifierViewFull.getStartX() + keyPositionModifierOffset, keyPositionModifierViewFull.getStartY(), (keyPositionModifierViewFull.getWidth() * (float) numWhiteKeysVisible) / MAX_WHITEKEY_COUNT, keyPositionModifierViewFull.getHeight());
+    keyPositionModifierOffset = keyTranslateXFactor * ((float)allKeysView.getWidth()) / (MAX_WHITEKEY_COUNT);
+    keyPositionModifierView.setBounds(allKeysView.getStartX() + keyPositionModifierOffset, allKeysView.getStartY(), (allKeysView.getWidth() * (float) numWhiteKeysVisible) / MAX_WHITEKEY_COUNT, allKeysView.getHeight());
 
     keyCountModifierTranlations[0]= width - keyCountDecView.getWidth();//for translation of keyCountIncView
     keyCountModifierTranlations[1]=0;
@@ -532,8 +495,11 @@ void PianoView::doPianoLayout()
     setBlackKeyTranslations();
 
     //TODO DP
-    noteNameView.setBounds(whiteKeyView.getStartX(),whiteKeyView.getStartY() + 0.7*whiteKeyView.getHeight(),whiteKeyView.getWidth()/2.0,whiteKeyView.getWidth()/1.8);
+    noteNameView.setBounds(whiteKeyView.getStartX() + whiteKeyView.getWidth()/4.0 ,whiteKeyView.getStartY() + 0.8*whiteKeyView.getHeight(),whiteKeyView.getWidth()/4.0,whiteKeyView.getWidth()/4.0);
     octaveNumView.setBounds(noteNameView.getEndX(),noteNameView.getStartY(),noteNameView.getWidth(),noteNameView.getHeight());
+
+    topFrameView.setBounds(0,0,width,dispMetrics.screenHeight * 20/100.0);//TODO out of the piano View
+    midFrameView.setBounds(topFrameView.getStartX(),topFrameView.getEndY(),topFrameView.getWidth(),topFrameView.getHeight());
 }
 
 void PianoView::prepareShaders(AssetManager *assetManager)
@@ -556,17 +522,20 @@ void PianoView::prepareShaders(AssetManager *assetManager)
     blackKeyVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"blackKeyVerts");
     noteNameVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"noteNameVerts");
     octaveNumVertsLoc = glGetAttribLocation(keysAndNoteNamesShader,"octaveNumVerts");
+    allKeyVertsLoc    =  glGetAttribLocation(keysAndNoteNamesShader, "allKeysVerts");
     textureCoordsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"textureCoords");
     keysAreaBoundsLoc = glGetUniformLocation(keysAndNoteNamesShader,"keysAreaBounds");
     keyTexLoc         = glGetUniformLocation(keysAndNoteNamesShader,"keyTextures");
     blackKeyTransLationXLoc = glGetUniformLocation(keysAndNoteNamesShader,"blackKeyTransLationX");
+    noteNamesTexLoc = glGetUniformLocation(keysAndNoteNamesShader,"notesTextures");
+    allKeyTexLoc = glGetUniformLocation(keysAndNoteNamesShader, "allKeysTexture");
     paramsLoc = glGetUniformLocation(keysAndNoteNamesShader ,"params");
     isKeyOnLoc = glGetUniformLocation(keysAndNoteNamesShader,"isKeyOn");
 
     GLContext::getError("get Shader Locations");
 
-    KSLOGD(TAGLOG, "btextuers locations %d %d %d %d %d %d %d %d %d %d", whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc
-    ,textureCoordsLoc,keysAreaBoundsLoc,keyTexLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc);
+    KSLOGD(TAGLOG, "btextuers locations %d %d %d %d %d %d %d %d %d %d %d %d", whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc
+    ,textureCoordsLoc,keysAreaBoundsLoc,keyTexLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,noteNamesTex,allKeyTex);
 
 
 
@@ -787,7 +756,6 @@ void PianoView::initKeyRenderIndices()
 
 
 //Touch Listener
-
 bool PianoTouchListener::onTouch(const ks::MotionEvent &event, View *view)
 {
 //TODO not using this now
@@ -917,8 +885,6 @@ bool PianoTouchListener::onHoverExit(const ks::TouchID &id)
 
     return false;
 }
-
-
 
 //  return TouchListener::onMove(x, y, id);
 
