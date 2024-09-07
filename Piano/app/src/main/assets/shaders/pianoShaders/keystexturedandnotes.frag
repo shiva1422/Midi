@@ -25,7 +25,6 @@ uniform sampler2D keyTextures[4];//white off,on,black off, on
 uniform vec4 keyNameColor;
 uniform sampler2DArray notesTextures;
 
-uniform sampler2D allKeysTexture;
 
 void main()
 {
@@ -51,18 +50,14 @@ void main()
         }
         break;
 
-        case 2: //allkeys
-        Fragcolor = texture(allKeysTexture,textCoordsOut);
-        break;
-
-        case 3://note name
+        case 2://note name
         col = texture(notesTextures, vec3(textCoordsOut.xy,keyNum));
         if(col.x <= 0.2)
         discard;
         Fragcolor = color;
         break;
 
-        case 4 :// octave num
+        case 3 :// octave num
         col = texture(notesTextures, vec3(textCoordsOut.xy,keyNum));
         if(col.x <= 0.2)
         discard;

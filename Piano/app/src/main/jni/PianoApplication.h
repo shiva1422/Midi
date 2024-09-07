@@ -18,6 +18,7 @@
 #include "Audio/OboeAudioRenderNode.h"
 #include "Midi/MidiPlayer.h"
 #include "UI/PianoView.h"
+#include "UI/PianoSettingsView.h"
 
 
 class PianoApplication : public KSApplication{
@@ -76,15 +77,11 @@ protected:
 
 private:
 
-    void createContentView();
+    View * createContentView();
 
 private:
 
     PianoSynthNode piano;
-    ViewGroup *contentView = nullptr;
-    ViewGroup *midFrame = nullptr;
-    GLImageView *topFrame = nullptr;
-    PianoView *pianoVew = nullptr;
 
     MidiPlayer midiPlayer;
     //This controls UI and Music Synth
@@ -92,6 +89,16 @@ private:
     IPianoController *pianoUIController;
 
     TextEngine textEngine;
+
+    //Views, TODO combine into single layout
+
+    ViewGroup *contentView = nullptr;
+    PianoSettingsView *settingsView = nullptr;
+    GLImageView *topFrame = nullptr;
+    GLImageView *light1 = nullptr;
+    GLImageView *light2 = nullptr;
+
+    PianoView *pianoVew = nullptr;
 
 };
 

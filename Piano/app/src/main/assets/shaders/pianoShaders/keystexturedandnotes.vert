@@ -51,7 +51,7 @@ void main()
 
         //vertex.x + translate ;//where translate = index *(whitekeyWidthGL + keyGapGL)
         finalVerts.x = whiteKeyVerts.x + ( float(index) * ( params[2]) );//TODO this get directly params[0] + params[1]
-        finalVerts.y = whiteKeyVerts.y;
+        finalVerts.y = whiteKeyVerts.y - 0.015;
 
         if(isKeyOn[index] == 1)
         {
@@ -83,28 +83,23 @@ void main()
         }
         keyType = 0;
     }
-    else if(index == 88)
-    {
-        finalVerts = allKeysVerts;
-        keyType = 2;
-    }
     else//note name,octavenumber
     {
-        if(index<141)//
+        if(index<140)//
         {
-             finalVerts.x = noteNameVerts.x + (float(index - 89) * (params[0] + params[1]));
+             finalVerts.x = noteNameVerts.x + (float(index - 88) * (params[0] + params[1]));
              finalVerts.y = noteNameVerts.y;
-             keyType = 3;
-             keyNum = ( 52 - (141 - index))%7;//A to g ,0 - 7
+             keyType = 2;
+             keyNum = ( 52 - (140 - index))%7;//A to g ,0 - 7
 
         }
         else
         {
            // keyNo=index-144;
-            finalVerts.x = octaveNumVerts.x + (float(index - 141) * (params[0] + params[1]));
+            finalVerts.x = octaveNumVerts.x + (float(index - 140) * (params[0] + params[1]));
             finalVerts.y = octaveNumVerts.y;
-            keyType = 4;
-            keyNum = (index - 136)/7 + 7;
+            keyType = 3;
+            keyNum = (index - 135)/7 + 7;
 
         }
 

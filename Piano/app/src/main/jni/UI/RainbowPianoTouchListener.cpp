@@ -124,7 +124,7 @@ bool RainbowPianoTouchListener::onMove(const float &x, const float &y, const ks:
 }
 
 
-bool RainbowPianoTouchListener::onHoverExit(const ks::TouchID &id)
+bool RainbowPianoTouchListener::onHoverExit(const ks::TouchID &id, const float &x, const float &y)
 {
     //TODO also check aptly inside keys area of sliders
    //Moved out of piano

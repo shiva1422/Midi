@@ -15,9 +15,11 @@
 #include "../Text/Text.h"
 #include "../Piano/PianoCore.h"
 #include "../Piano/IPianoController.h"
+#include "../Piano/IPianoSettingsControl.h"
 #include <mutex>
 #include <KSUI/GL/GLImageView.h>
 #include <KSUI/GL/RectView.h>
+#include <KSUI/View.h>
 
 
 #define MIN_WHITEKEY_COUNT 7
@@ -30,7 +32,7 @@
     * A0 - C8
     */
 
-class PianoView : public View, public IPianoController{
+class PianoView : public View, public IPianoController, public IPianoSettingsControl{
 
     //TODO Moves Shaders to here as string rather than reading from assets
 
@@ -54,11 +56,9 @@ public:
 
     void draw() override;
 
-    // void prepare();
-
-    void testDraw();
-
-    //factor should be increment in terms of whitekeyWidth.eg 1.5 implies move 1.5 white keys left,-1.5 implies move 1.5 keys right.
+    /**
+     * @param factor should be increment in terms of whitekey width , eg -1.5 implies move 1.5 white keys left,-.5 implies move 1.5 keys right.
+     */
     void translateKeyXPosition(float factor);
 
 
@@ -71,10 +71,24 @@ public:
     void setKeysStates(const std::vector<KeyStateInfo> states) override;
 
 
+    /**SetttingsControl**/
+
+    IPianoSettingsControl * getSettingsControl(){return  this;}
+
+    int getNumWhiteKeysVisible() override;
+
+    void incrementNumKeysVisible(int incCount) override;
+
+    void decrementNumKeysVisible(int incCount) override;
+
+    void moveKeysToRight(float whiteKeyFactor) override;
+
+    void moveKeysToLeft(float whiteKeyFactor) override;
+
+
 private:
 
     friend class PianoApplication;
-    void setShaderProgram(GLuint shader){this->shader = shader;}//TODO Temporary only later bring shaders into strings from assets
 
     void prepareShaders(AssetManager *assetManager);
 
@@ -91,17 +105,13 @@ private:
     //only drawKeys and noteNames
     void drawKeysAndNoteNames();
 
-    //draw all other keyboard frame sliders and any thing required decorations;
-    void drawNonKeyViews();
-
-
 private:
 
     GLuint keysAndNoteNamesShader = 0;
 
     //locations for above shader
-    GLint whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc,keysAreaBoundsLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,keyGapXLoc,
-            textureCoordsLoc,noteNamesTexLoc, allKeyTexLoc,keyCountVertLoc,allKeyVertsLoc;
+    GLint whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc,keysAreaBoundsLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,
+            textureCoordsLoc,noteNamesTexLoc;
 
     //2 textures for each one off and one on.
     GLint keyTexLoc;
@@ -121,13 +131,11 @@ private:
 private:
 
     //Textures
-    KSImage* allKeysImage;
-
     KSImage* keyImages[4];//black key, blackKeyTap,whiteKey,whiteKeyTap;
 
     GLuint keyTextures[4];//
 
-    GLuint allKeyTex = 0,noteNamesTex = 0 , noteNamesBuf = 0;
+    GLuint noteNamesTex = 0;
 
     //TODO move outof this
     TextEngine *textEngine = nullptr;
@@ -137,11 +145,8 @@ private:
 
 
 private:
-    //Piano All Measurements
 
-    //blackKey, whiteKey, keySizeDec, topBackground, keyPositionChanger, keyPosChangerFull,noteNameDims,octaveNumDims;//keyPositionChanger is the total width of the position Bar
-    //below Views only for dimension not drawing ,but if needed more complicated rendering extend GLView to create those .
-    //All View below are tranlated while rendereing their positions are not absolute;
+    //Piano All Measurements
 
     //To store bounds for Keys rendering area;
     GLView keysAreaView;
@@ -156,14 +161,6 @@ private:
 
     GLView octaveNumView;
 
-
-    //
-    GLImageView keyCountDecView,keyCountIncView,keyPositionRightView,keyPositionLeftView;
-    GLImageView topFrameView,midFrameView;
-    RectView keyPositionModifierView;
-
-
-
     //keyOn-1 off - 0
     int keyOn[PIANO_MAX_KEY_COUNT] = {0};//TODO 89?shader
 
@@ -172,17 +169,14 @@ private:
     float blackKeyTranslationsGL[5];
 
 
-    float keyCountModifierTranlations[2];
     //WhiteKeys
-    int numWhiteKeysVisible = 24;
+    int numWhiteKeysVisible = 15;
 
     float whiteKeyWidth = 50;//px
 
     float blackKeyWidth = 0.6 * whiteKeyWidth;
 
     float keyGap = 1.0;//px
-
-    float topNonKeyHeightRatio = 0.1;//percentage of total piano height above keyStarty.
 
     float globalKeyTranslateX = 0;//in pixels
 
@@ -210,12 +204,14 @@ private:
 private:
 
     friend class PianoTouchListener;
+    friend class PianoSettingsView;
 
     //x,y in screen coords
     EKeyName getKeyNoAtLoc(float x,float y);
 
 
 };
+
 
 
 //TODO extend this as PianoController as this controls piano
@@ -232,7 +228,9 @@ protected:
     //TODO dont used this
     bool onTouch(const ks::MotionEvent &event, View *view) override;
 
-    bool onHoverExit(const ks::TouchID &id) override;
+    bool onHoverExit(const ks::TouchID &id, const float &x, const float &y) override;
+
+    bool onHoverEnter(const float &d, const float &d1, const ks::TouchID &i) override;
 
 private:
 

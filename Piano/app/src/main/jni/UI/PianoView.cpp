@@ -36,7 +36,7 @@ PianoView::PianoView(float width, float height) : PianoView(0, 0, width, height)
 
 PianoView::PianoView(float startX, float startY, float width, float height) : View(startX, startY, width, height)
 {
-    setBounds(startX,startY,width,height);
+    setBounds(startX,startY,width,height);//TODO calling virtual method;
 }
 
 PianoView::PianoView(float startX, float startY, float width, float height, TextEngine *textEngine) : PianoView(startX, startY, width, height)
@@ -60,55 +60,16 @@ void PianoView::clearBackground()
     // glDisable(GL_SCISSOR_TEST);//end of drawing TODO
 }
 
-
-
-
-void PianoView::testDraw()
-{
-    allKeysView.setBackgroundColor(1.0, 0.2, 1.0, 1.0);
-    keyPositionModifierView.setBackgroundColor(0.0,0.4,1.0,1.0);
-    noteNameView.setBackgroundColor(1.0,0.0,0.0,1.0);
-    octaveNumView.setBackgroundColor(0.0,1.0,1.0,1.0);
-    whiteKeyView.setBackgroundColor(1.0,1.0,1.0,1.0);
-    blackKeyView.setBackgroundColor(0.0,0.0,0.0,1.0);
-    allKeysView.clearBackground();
-    keyPositionModifierView.clearBackground();
-    whiteKeyView.clearBackground();
-    blackKeyView.clearBackground();
-    noteNameView.clearBackground();
-    octaveNumView.clearBackground();
-}
-
-
-void PianoView::drawNonKeyViews()
-{
-    assert(false);
-}
-
-
+   /**
+    * draw all in one call using instance rendering
+    * 88 keys(52 white + 36 black) ,52 notenames,52 octave numbers
+    */
 
 //TODO VAO and UBO,uniform buffers.
 void PianoView::drawKeysAndNoteNames()
 {
-    /*
-     * draw all in one call using instance rendering
-     * 88 keys(52 white + 36 black) ,52 notenames,52 octave numbers
-     */
 
-//    if(bMovePositionModifierRightDebug)
-//     translateKeyXPosition(0.05);
-//    else
-//      translateKeyXPosition(-0.05);
-//TODO use Vertex and Uniform buffers and VertexArrays
-    //glEnable(GL_BLEND);
-    //glEnable(GL_SCISSOR_TEST);
-   // glScissor(getStartX(),getStartY() - getHeight(),getWidth(),getHeight());
-
-   //keysAreaView.setBackgroundColor(0.0,0.0,0.0,1.0);
-  // keysAreaView.clearBackground();
-    //GLContext::getError("drawKeysAndNoteNames0");
     glUseProgram(keysAndNoteNamesShader);
-    // GLContext::getError("drawKeysAndNoteNames 1");
 
     glEnableVertexAttribArray(whiteKeyVertsLoc);
     glVertexAttribPointer(whiteKeyVertsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) whiteKeyView.getVertices());
@@ -119,14 +80,6 @@ void PianoView::drawKeysAndNoteNames()
     glEnableVertexAttribArray(textureCoordsLoc);
     glVertexAttribPointer(textureCoordsLoc, 2, GL_FLOAT, GL_FALSE, 0, (void *) textCoods);
 
-    glEnableVertexAttribArray(allKeyVertsLoc);
-    glVertexAttribPointer(allKeyVertsLoc, 2, GL_FLOAT,GL_FALSE,0,(void *)allKeysView.getVertices());
-
-    float *v = allKeysView.getVertices();
-    KSLOGD(TAGLOG, "boombass (%f,%f) (%f %f) (%f,%f) (%f %f)",v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7]);
-
-
-    // GLContext::getError("drawKeysAndNoteNames 3");
 
     bNoteNamesVisible = true;;//debug only
     if(bNoteNamesVisible)
@@ -139,30 +92,21 @@ void PianoView::drawKeysAndNoteNames()
         glEnableVertexAttribArray(octaveNumVertsLoc);
         glVertexAttribPointer(octaveNumVertsLoc,2,GL_FLOAT,GL_FALSE,0,(void *)octaveNumView.getVertices());
 
-        //GLContext::getError("drawKeysAndNoteNames unigdfd");
-
     }
 
-
-
     glUniform1fv(blackKeyTransLationXLoc,5,blackKeyTranslationsGL);
-    // GLContext::getError("drawKeysAndNoteNames unigd3");
 
     glUniform4f(keysAreaBoundsLoc,keysAreaView.getStartXGL(),keysAreaView.getStartYGL(),keysAreaView.getWidthGL(),keysAreaView.getHeightGL());//TODO enable
-    //KSLOGD(TAGLOG,"keyAreaStartX %f,keyArea StartY %f ,keyAreaWidht %f,keyAreaHeight %f",keysAreaView.getStartXGL(),keysAreaView.getStartYGL(),keysAreaView.getWidthGL(),keysAreaView.getHeightGL());
 
     float params[] = {whiteKeyView.getWidthGL(),(float)(keyGap * 2.0)/dispMetrics.screenWidth,static_cast<float>(((whiteKeyView.getWidth() + keyGap) * 2.0)/(float)dispMetrics.screenWidth)};//TODO keyGap in GL helper coords
 
     glUniform1fv(paramsLoc,3,params);
-    //GLContext::getError("drawKeysAndNoteNames unigd");
 
     std::unique_lock<std::mutex> stateLock(mutKeyStates);
     glUniform1iv(isKeyOnLoc,89,keyOn);//TODO 88
     stateLock.unlock();//TODO keep copy of keyon instead of lock around glfunction.
 
-
     //Textures
-
     for(int i = 0; i < 4; ++i)
     {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -174,12 +118,10 @@ void PianoView::drawKeysAndNoteNames()
     glBindTexture(GL_TEXTURE_2D_ARRAY,noteNamesTex);
     glUniform1i(noteNamesTexLoc,4);
 
-    glActiveTexture(GL_TEXTURE0 + 5);
-    glBindTexture(GL_TEXTURE_2D,allKeyTex);
-    glUniform1i(allKeyTexLoc,5);
+
 
     // can improve performance by TODO note names and number can be draw in same time as white key,see frag shader
-    int instanceCnt = 88 + 1 ;//88 keys  ,allkeys;
+    int instanceCnt = 88  ;//88 keys
     if(bNoteNamesVisible)//TODO this is not yet done
         instanceCnt += 52 + 52;//notename + octaveNum
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, keyIndices,instanceCnt);
@@ -190,88 +132,24 @@ void PianoView::drawKeysAndNoteNames()
     glDisableVertexAttribArray(whiteKeyVertsLoc);
     glDisableVertexAttribArray(blackKeyVertsLoc);
     glDisableVertexAttribArray(textureCoordsLoc);
-    glDisableVertexAttribArray(allKeyVertsLoc);
     glDisableVertexAttribArray(noteNameVertsLoc);
     glDisableVertexAttribArray(octaveNumVertsLoc);
 
-
-
-
-
-    //glDisable(GL_SCISSOR_TEST);//TODO do this after around correct bound in draw
-
-    //clear disable
-    // KSLOGD(TAGLOG,"drawingKeys and NoteNames");
-    // assert(false);
 }
 
 //can improve performance by TODO instead of drawing every frame, draw to frame buffer once and then draw only when there is a change
 void PianoView::draw() {
 
-
-   // drawKeysAndNoteNames();
-    /// drawNonKeyViews();
-
-    //return;
-//    //All the piano is drawn in single draw call using instanced Rendering .
-//    if(bMovePositionModifierRightDebug)
-//    translateKeyXPosition(0.05);
-//    else
-//        translateKeyXPosition(-0.05);
-
-
-    //TODO no nedx
-    assert(shader != 0);
-    //setBackgroundColor(1.0,0.0,0.0,1.0);
-   // clearBackground();
-    int drawCost = 100;//ms
-    // KSLOGD(TAGLOG,"DrawingPiano");
-
-  //  glEnable(GL_BLEND);
-  //  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-   topFrameView.draw();
-  // topFrameView.setBackgroundColor(1.0,1.0,1.0,1.0);
-   //topFrameView.clearBackground();
-    midFrameView.draw();
-   // midFrameView.setBackgroundColor(1.0,1.0,1.0,1.0);
-   // midFrameView.clearBackground();
-    //Drawing
+    // clearBackground();
     drawKeysAndNoteNames();
-
-    //below four combine into an actionBar view;
-    //keyPositionModifierView.setBackgroundColor(1.0,0.0,1.0,0.2);
-
-    keyCountDecView.draw();
-    keyCountIncView.draw();
-    keyPositionLeftView.draw();
-    keyPositionRightView.draw();
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    keyPositionModifierView.setBackgroundColor(0.0,0.0,0.0,0.7);
-    keyPositionModifierView.draw();
-    glDisable(GL_BLEND);
-
-
-    //testView.draw();
-    // allKeysView.draw();
-   // keyCountDecImageView->clearBackground();
-
-    return;
-
 }
 
 void PianoView::resizeKeyCount(int whiteKeysVisibleCnt)
 {
 
     this->numWhiteKeysVisible = whiteKeysVisibleCnt;
-    float maxWidth = width;
-    float maxHeight = height;
-
-    whiteKeyWidth = (maxWidth-(numWhiteKeysVisible - 1)*keyGap)/(float)(numWhiteKeysVisible);
-    blackKeyWidth = 0.6*whiteKeyWidth;
-
+    translateKeyXPosition(0);//because the translateFactor also depends on keyVisible. to scale thre translate aptly;
+    doPianoLayout();
 }
 
 void PianoView::setBounds(float startX, float startY, float width, float height)
@@ -305,14 +183,12 @@ void PianoView::setupTextures()
 {
 
     assert(textEngine);
-    glUseProgram(shader);
 
     //TODO clear
     keyImages[0] = KSImageLoader::loadFromAsset("icons/white_key1.png");
     keyImages[1] = KSImageLoader::loadFromAsset("icons/white_key1_ontap.png");
     keyImages[2] = KSImageLoader::loadFromAsset("icons/black_key1.png");
     keyImages[3] = KSImageLoader::loadFromAsset("icons/black_key1_ontap.png");
-    allKeysImage = KSImageLoader::loadFromAsset("icons/allkeys.jpg");
 
     //white and black keys, TODO texutre array,cobine textures into one texture,also performance
     glGenTextures(4,keyTextures);
@@ -335,22 +211,6 @@ void PianoView::setupTextures()
         }
 
     }
-
-    if(allKeysImage)
-    {
-        //Texture for drawing KeyPositionModifierViewFull
-        glGenTextures(1,&allKeyTex);
-        glBindTexture(GL_TEXTURE_2D,allKeyTex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,allKeysImage->width,allKeysImage->height);
-        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,allKeysImage->width,allKeysImage->height,GL_RGBA,GL_UNSIGNED_BYTE,allKeysImage->data);
-        //delete allKeysImage;
-       // allKeysImage = nullptr;
-    }
-
 
     //set note names texture as texturearray2d /a to g and 1 to 7 and may be # ,+ and -
     //getPixmap for each name a-g ang 1-7 and #
@@ -403,14 +263,6 @@ void PianoView::setupTextures()
     glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_2D_ARRAY,0);
 
-    keyCountDecView.setImage("icons/test.png");
-    keyCountIncView.setImage("icons/test.png");
-    keyPositionLeftView.setImage("icons/test.png");
-    keyPositionRightView.setImage("icons/test.png");
-    topFrameView.setImage("icons/midframe2.png");//This should actually be ouside the PianoView;
-    midFrameView.setImage("icons/midframe.jpg");
-    keyPositionModifierView.setBackgroundColor(0.0,0.0,0.0,0.4);
-
 
 
     KSLOGE(TAGLOG, "Setup Textures Complete");
@@ -421,13 +273,13 @@ void PianoView::prepare(AssetManager *assetManager)
 {
     //TODO async
     prepareShaders(assetManager);
-    assert(shader);
     setupTextures();
     initKeyRenderIndices();
 }
 
 void PianoView::translateKeyXPosition(float factor)
 {
+    factor *= -1;//Just to align with the direction;
     keyTranslateXFactor += factor;
     float maxFactor = MAX_WHITEKEY_COUNT - numWhiteKeysVisible;
     if(keyTranslateXFactor > maxFactor)
@@ -448,16 +300,8 @@ void PianoView::translateKeyXPosition(float factor)
 
 void PianoView::doPianoLayout()
 {
-    //All measurements inside piano here;
-    //TODO check DP?
 
-
-    int topNonKeyHeight = topNonKeyHeightRatio * height;
-    //To make the keyCountDecView square convert to dp and the px;
-    int sizeModifierHieghtDP = dispMetrics.pixelToDP(topNonKeyHeight,EScreenDirection::Y);
-    int sizeModifierWidthInPX = dispMetrics.DPToPixel(sizeModifierHieghtDP,EScreenDirection::X);
-
-    keysAreaView.setBounds(startX,startY + topNonKeyHeight,width,(1.0 - topNonKeyHeightRatio) * height);
+    keysAreaView.setBounds(startX,startY ,width, height);
 
 
     whiteKeyWidth = (width-(numWhiteKeysVisible-1)*keyGap)/(float)(numWhiteKeysVisible);
@@ -465,20 +309,14 @@ void PianoView::doPianoLayout()
 
     //TODO add methods to setBounds in DP in View
 
-    allKeysView.setBounds(startX + width * 20.0/100, startY, width * 60.0/100, topNonKeyHeight);
-    keyCountDecView.setBounds(allKeysView.getStartX()-sizeModifierWidthInPX, allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
-    keyCountIncView.setBounds(allKeysView.getEndX(),allKeysView.getStartY(),keyCountDecView.getWidth(),keyCountDecView.getHeight());
-    keyPositionLeftView.setBounds(keyCountDecView.getStartX()-keyCountDecView.getWidth(), allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
-    keyPositionRightView.setBounds(keyCountIncView.getStartX()+keyCountIncView.getWidth(), allKeysView.getStartY(), sizeModifierWidthInPX, topNonKeyHeight);
-
-
+    allKeysView.setBounds(startX + width * 20.0/100, startY, width * 60.0/100, 100);
 
     //
     keyPositionModifierOffset = keyTranslateXFactor * ((float)allKeysView.getWidth()) / (MAX_WHITEKEY_COUNT);
-    keyPositionModifierView.setBounds(allKeysView.getStartX() + keyPositionModifierOffset, allKeysView.getStartY(), (allKeysView.getWidth() * (float) numWhiteKeysVisible) / MAX_WHITEKEY_COUNT, allKeysView.getHeight());
+   // keyPositionModifierView.setBounds(allKeysView.getStartX() + keyPositionModifierOffset, allKeysView.getStartY(), (allKeysView.getWidth() * (float) numWhiteKeysVisible) / MAX_WHITEKEY_COUNT, allKeysView.getHeight());
 
-    keyCountModifierTranlations[0]= width - keyCountDecView.getWidth();//for translation of keyCountIncView
-    keyCountModifierTranlations[1]=0;
+    //keyCountModifierTranlations[0]= width - keyCountDecView.getWidth();//for translation of keyCountIncView
+   // keyCountModifierTranlations[1]=0;
 
 
     int keyGapCnt = floor(keyTranslateXFactor);//TODO check required
@@ -488,7 +326,7 @@ void PianoView::doPianoLayout()
     KSLOGD(TAGLOG,"global %f",globalKeyTranslateX);
 
     KSLOGD("TAGLOG","whiteKeyBounds  scree width %d height %d globalTranslate %f transFactor %f mulitpl %f",dispMetrics.screenWidth,dispMetrics.screenHeight,globalKeyTranslateX,keyTranslateXFactor,keyTranslateXFactor * whiteKeyWidth);
-    whiteKeyView.setBounds(startX - globalKeyTranslateX ,startY + topNonKeyHeight ,whiteKeyWidth,height - topNonKeyHeight);
+    whiteKeyView.setBounds(startX - globalKeyTranslateX ,startY ,whiteKeyWidth,height);
 
     //startX same as whitekey and setBlackkey translation  accordingly
     blackKeyView.setBounds(whiteKeyView.getStartX(),whiteKeyView.getStartY(),blackKeyWidth,whiteKeyView.getHeight() * 0.6);
@@ -498,17 +336,11 @@ void PianoView::doPianoLayout()
     noteNameView.setBounds(whiteKeyView.getStartX() + whiteKeyView.getWidth()/4.0 ,whiteKeyView.getStartY() + 0.8*whiteKeyView.getHeight(),whiteKeyView.getWidth()/4.0,whiteKeyView.getWidth()/4.0);
     octaveNumView.setBounds(noteNameView.getEndX(),noteNameView.getStartY(),noteNameView.getWidth(),noteNameView.getHeight());
 
-    topFrameView.setBounds(0,0,width,dispMetrics.screenHeight * 20/100.0);//TODO out of the piano View
-    midFrameView.setBounds(topFrameView.getStartX(),topFrameView.getEndY(),topFrameView.getWidth(),topFrameView.getHeight());
 }
 
 void PianoView::prepareShaders(AssetManager *assetManager)
 {
     //TODO check intermediate shaders are cleared
-    IKSStream *vertA = assetManager->openAsset("shaders/pianoShaders/vertexShader.glsl");
-    IKSStream *fragA = assetManager->openAsset("shaders/pianoShaders/fragmentShader.glsl");
-    assert(vertA && fragA);
-    shader = Shader::createProgram(vertA,fragA);
 
     IKSStream *vertKeys = assetManager->openAsset("shaders/pianoShaders/keystexturedandnotes.vert");
     IKSStream *fragKeys = assetManager->openAsset("shaders/pianoShaders/keystexturedandnotes.frag");
@@ -522,20 +354,18 @@ void PianoView::prepareShaders(AssetManager *assetManager)
     blackKeyVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"blackKeyVerts");
     noteNameVertsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"noteNameVerts");
     octaveNumVertsLoc = glGetAttribLocation(keysAndNoteNamesShader,"octaveNumVerts");
-    allKeyVertsLoc    =  glGetAttribLocation(keysAndNoteNamesShader, "allKeysVerts");
     textureCoordsLoc  = glGetAttribLocation(keysAndNoteNamesShader,"textureCoords");
     keysAreaBoundsLoc = glGetUniformLocation(keysAndNoteNamesShader,"keysAreaBounds");
     keyTexLoc         = glGetUniformLocation(keysAndNoteNamesShader,"keyTextures");
     blackKeyTransLationXLoc = glGetUniformLocation(keysAndNoteNamesShader,"blackKeyTransLationX");
     noteNamesTexLoc = glGetUniformLocation(keysAndNoteNamesShader,"notesTextures");
-    allKeyTexLoc = glGetUniformLocation(keysAndNoteNamesShader, "allKeysTexture");
     paramsLoc = glGetUniformLocation(keysAndNoteNamesShader ,"params");
     isKeyOnLoc = glGetUniformLocation(keysAndNoteNamesShader,"isKeyOn");
 
     GLContext::getError("get Shader Locations");
 
-    KSLOGD(TAGLOG, "btextuers locations %d %d %d %d %d %d %d %d %d %d %d %d", whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc
-    ,textureCoordsLoc,keysAreaBoundsLoc,keyTexLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,noteNamesTex,allKeyTex);
+    KSLOGD(TAGLOG, "btextuers locations %d %d %d %d %d %d %d %d %d %d %d", whiteKeyVertsLoc,blackKeyVertsLoc,noteNameVertsLoc,octaveNumVertsLoc
+    ,textureCoordsLoc,keysAreaBoundsLoc,keyTexLoc,blackKeyTransLationXLoc,paramsLoc,isKeyOnLoc,noteNamesTex);
 
 
 
@@ -753,6 +583,36 @@ void PianoView::initKeyRenderIndices()
 
 }
 
+int PianoView::getNumWhiteKeysVisible() {
+    return numWhiteKeysVisible;
+}
+
+void PianoView::incrementNumKeysVisible(int incCount) {
+
+    KSLOGD("PianoSetting","increase keys");
+    int count = getNumWhiteKeysVisible() + incCount;
+    if(count > MAX_WHITEKEY_COUNT)count=MAX_WHITEKEY_COUNT;
+    resizeKeyCount(count);
+
+}
+
+void PianoView::decrementNumKeysVisible(int decCount) {
+
+    KSLOGD("PianoSetting","decrease keys");
+    int count = getNumWhiteKeysVisible() - decCount;
+    if(count < MIN_WHITEKEY_COUNT)count=MIN_WHITEKEY_COUNT;
+    resizeKeyCount(count);
+}
+
+void PianoView::moveKeysToRight(float whiteKeyFactor) {
+
+    translateKeyXPosition(whiteKeyFactor);
+
+}
+
+void PianoView::moveKeysToLeft(float whiteKeyFactor) {
+    translateKeyXPosition(whiteKeyFactor);
+}
 
 
 //Touch Listener
@@ -804,6 +664,7 @@ bool PianoTouchListener::onTouchDown(const float &x, const float &y, const ks::T
 
 bool PianoTouchListener::onTouchUp(const float &x, const float &y, const ks::TouchID &id,const bool &isLast)
 {
+    //TODO if islast all should be up (experiment instead of just setting all to off to see any odd thng happens
 
     PianoView* piano = reinterpret_cast<PianoView *>(this->view);
     if(piano->keysAreaView.isPointInside(x,y))
@@ -821,8 +682,9 @@ bool PianoTouchListener::onTouchUp(const float &x, const float &y, const ks::Tou
     {//TODO
         KSLOGE(TAGLOG,"error");
     }
+
+    //if isLast allKeySHould be off
     return false;
-    //return TouchListener::onTouchUp(x, y, id, isLast);
 }
 
 bool PianoTouchListener::onMove(const float &x, const float &y, const ks::TouchID &id)
@@ -847,15 +709,16 @@ bool PianoTouchListener::onMove(const float &x, const float &y, const ks::TouchI
         }
         else
         {
-            //same key already on,so nothing to do
+            //finger moving in same key that is already set on.
+
             return true;
         }
     }
     else
     {
-        //TODO
+        //TODO,This generally should be triggered from outside to HoverExit;
 
-        //Move out of the keys area but same finger touch caused keyon before;
+        //Move out of the keys area but same finger moved that caused keyon before;,HoverExit(equivalent).
         if(previousPointedKey[id] != EKeyName::INVALID)
         {
             piano->controller->setKeyState(previousPointedKey[id],EKeyState::KEYSTATE_OFF);
@@ -870,7 +733,7 @@ bool PianoTouchListener::onMove(const float &x, const float &y, const ks::TouchI
 }
 
 
-bool PianoTouchListener::onHoverExit(const ks::TouchID &id)
+bool PianoTouchListener::onHoverExit(const ks::TouchID &id, const float &x, const float &y)
 {
     //TODO also check aptly inside keys area of sliders
     //Moved out of piano
@@ -883,8 +746,13 @@ bool PianoTouchListener::onHoverExit(const ks::TouchID &id)
         previousPointedKey[id] = EKeyName::INVALID;
     }
 
+
+    KSLOGD(TAGLOG,"OnHoverExit");
     return false;
 }
 
-//  return TouchListener::onMove(x, y, id);
+bool PianoTouchListener::onHoverEnter(const float &d, const float &d1, const ks::TouchID &i) {
+    KSLOGW(TAGLOG,"OnHoverEnter");
+    return TouchListener::onHoverEnter(d, d1, i);
+}
 
