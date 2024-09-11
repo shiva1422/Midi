@@ -12,7 +12,7 @@
 #include "Audio/OboeAudioRenderNode.h"
 
 /**
- * This should be triggered from touch,Keyboard/midi
+ * This should be triggered from touch,Keyboard/midi,MidiPlayer
  * Controls both UI and Music,Make sure all members are initialized right   before calling any function
  */
 
@@ -23,6 +23,14 @@ public:
     PianoController();
 
     int prepare();
+
+    int pause();
+
+    int release();
+
+    int resume();
+
+    int exit();
 
     void setAssetManager(AssetManager *manager);
 

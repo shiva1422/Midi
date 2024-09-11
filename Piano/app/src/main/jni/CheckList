@@ -1,0 +1,3 @@
+
+1. would crash at the start , intercepting touch events.
+2. precision in shaders ,prepare all shaders at once and multithreaded gl.

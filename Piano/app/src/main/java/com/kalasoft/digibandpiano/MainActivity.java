@@ -14,6 +14,9 @@ import android.view.WindowManager;
 
 import com.kalasoft.Midi.MidiEngine;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 
 public class MainActivity extends NativeActivity {
 
@@ -79,6 +82,33 @@ public class MainActivity extends NativeActivity {
 
         return bitmap;
     }
+
+    Bitmap loadImageAsset(String path) {
+        InputStream is = null;
+        Bitmap image = null;
+        try {
+            is = getAssets().open(path);
+            image=BitmapFactory.decodeStream(is);
+        }
+        catch(IOException ioe) {
+
+            ioe.printStackTrace();
+            Log.e("LoadImage", "from assets io error");
+
+        }
+        finally {
+            if( is != null)
+            {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    Log.e("LoadImage", " error close the stream");
+                }
+            }
+        }
+
+        return image;
+    }
     private void hideSystemUI() {
         // Enables regular immersive mode.
         // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
@@ -129,7 +159,4 @@ public class MainActivity extends NativeActivity {
         }
 
     }
-
-
-
 }

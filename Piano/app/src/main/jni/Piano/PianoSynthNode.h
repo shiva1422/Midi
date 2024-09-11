@@ -12,6 +12,7 @@
 #include "IPianoController.h"
 #include "../GN/IMediaNode.h"
 #include "../Music/SoundBank.h"
+#include "../GN/MediaEvent.h"
 
 class PianoSynthNode : public  IPianoController, public IMediaNode, public IPipelineAllocator, public ks::AudioInterface{
 
@@ -66,19 +67,26 @@ private:
 private:
 
    // ks::Thread synthThread;
-   std::thread synthThread;
+    std::thread synthThread;
 
-    bool bExitThread = false;
+    std::atomic<bool> bExitThread{false};
+    std::atomic<bool> bThreadCreated{false};
+    bool bPaused = true;
 
 private:
+
     SoundBank soundBank;
 
     AssetManager * assetManager;
 
-    int pipelineCnt = 2;//based on audio rendering might need to incraese to avoid underruns
+    int pipelineCnt = 3;//based on audio rendering might need to incraese to avoid underruns
     std::queue<MediaPipeline *> pipelineQ;
     std::mutex mutPipeline;
     std::condition_variable condPipeline;
+
+    std::queue<MediaEvent> events;
+    std::mutex mutEvents;
+    std::condition_variable condThread;
 
 
 };

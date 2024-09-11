@@ -29,7 +29,8 @@ set(ANDROID_SRCS
 
 add_library(ksmain SHARED ${ANDROID_SRCS})
 
-add_library(pianoui STATIC UI/RainbowPianoView.cpp UI/RainbowPianoTouchListener.cpp)
+add_library(pianoui STATIC UI/RainbowPianoView.cpp UI/RainbowPianoTouchListener.cpp UI/PianoView.cpp
+        UI/PianoSettingsView.cpp)
 
 #This project deps
 add_subdirectory(${CMAKE_SOURCE_DIR}/Audio ./pianoaudiolib)

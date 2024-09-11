@@ -128,17 +128,19 @@ DataCallbackResult OboeAudioRenderNode::onAudioReady(AudioStream *audioStream, v
 
 bool OboeAudioRenderNode::onError(AudioStream *stream, Result result)
 {
-    //TODO
+    KSLOGD(TAGLOG,"OboeRenderer error");
     return AudioStreamErrorCallback::onError(stream, result);
 }
 
 void OboeAudioRenderNode::onErrorBeforeClose(AudioStream *stream, Result result)
 {
+    KSLOGD(TAGLOG,"OboeRenderer error closing the stream internally");
     AudioStreamErrorCallback::onErrorBeforeClose(stream, result);
 }
 
 void OboeAudioRenderNode::onErrorAfterClose(AudioStream *stream, Result result)
 {
+    KSLOGD(TAGLOG,"OboeRenderer error After the stream internally");
     AudioStreamErrorCallback::onErrorAfterClose(stream, result);
 }
 

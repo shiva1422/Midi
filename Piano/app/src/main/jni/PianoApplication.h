@@ -7,6 +7,7 @@
 
 
 #include <KSApp/KSApplication.h>
+#include <KSUI/ViewGroup.h>
 #include "Codec/WavDecoder.h"
 
 #include "Audio/SLESAudioPlayer.h"
@@ -16,6 +17,8 @@
 #include "PianoController.h"
 #include "Audio/OboeAudioRenderNode.h"
 #include "Midi/MidiPlayer.h"
+#include "UI/PianoView.h"
+#include "UI/PianoSettingsView.h"
 
 
 class PianoApplication : public KSApplication{
@@ -25,6 +28,8 @@ public:
     PianoApplication() = delete;
 
     PianoApplication(android_app *app);
+
+    ~PianoApplication();
 
     bool onInterceptMotionEvent(const ks::MotionEvent &me) override;
 
@@ -74,8 +79,10 @@ protected:
 
 private:
 
-    PianoSynthNode piano;
-    RainbowPianoView *pianoVew = nullptr;
+    View * createContentView();
+
+private:
+
 
     MidiPlayer midiPlayer;
     //This controls UI and Music Synth
@@ -83,6 +90,16 @@ private:
     IPianoController *pianoUIController;
 
     TextEngine textEngine;
+
+    //Views, TODO combine into single layout
+
+    ViewGroup *contentView = nullptr;
+    PianoSettingsView *settingsView = nullptr;
+    GLImageView *topFrame = nullptr;
+    GLImageView *light1 = nullptr;
+    GLImageView *light2 = nullptr;
+
+    PianoView *pianoVew = nullptr;
 
 };
 

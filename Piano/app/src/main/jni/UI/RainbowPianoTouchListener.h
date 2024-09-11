@@ -24,7 +24,7 @@ protected:
     //TODO dont used this
     bool onTouch(const ks::MotionEvent &event, View *view) override;
 
-    bool onHoverExit(const ks::TouchID &id) override;
+    bool onHoverExit(const ks::TouchID &id, const float &x, const float &y) override;
 
 private:
 

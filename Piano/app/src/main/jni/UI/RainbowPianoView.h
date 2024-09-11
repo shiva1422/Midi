@@ -117,7 +117,7 @@ private:
 private:
 
     //Textures
-    KSImage allKeysImage;
+    KSImage *allKeysImage;
 
     GLuint allKeyTex = 0 ,noteNamesTex = 0 , noteNamesBuf = 0;
 
@@ -160,7 +160,7 @@ private:
 
     float keyCountModifierTranlations[2];
     //WhiteKeys
-    int numWhiteKeysVisible = DEFAULT_WHITEKEY_COUNT;
+    int numWhiteKeysVisible = 10;
 
     float whiteKeyWidth = 50;//px
 
@@ -196,14 +196,9 @@ private:
 private:
 
     friend class RainbowPianoTouchListener;
-
     //x,y in screen coords
     EKeyName getKeyNoAtLoc(float x,float y);
-
-
-
-
-
+    
 };
 
 

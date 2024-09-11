@@ -79,7 +79,7 @@ void RainbowPianoView::drawNonKeyViews()
     assert(false);
 }
 
-GLushort keyIndices[] = {0, 1, 2, 2, 3, 0};
+static  GLushort keyIndices[] = {0, 1, 2, 2, 3, 0};
 
 
 void RainbowPianoView::drawKeysAndNoteNames()
@@ -111,7 +111,7 @@ void RainbowPianoView::drawKeysAndNoteNames()
    // GLContext::getError("drawKeysAndNoteNames 3");
 
 
-    if(bNoteNamesVisible)
+    if(bNoteNamesVisible || true)
     {
 
         glEnableVertexAttribArray(noteNameVertsLoc);
@@ -166,7 +166,7 @@ void RainbowPianoView::drawKeysAndNoteNames()
 void RainbowPianoView::draw() {
 
 
-    //drawKeysAndNoteNames();
+    drawKeysAndNoteNames();
    /// drawNonKeyViews();
 
     //return;
@@ -308,8 +308,8 @@ void RainbowPianoView::setupTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,allKeysImage.width,allKeysImage.height);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,allKeysImage.width,allKeysImage.height,GL_RGBA,GL_UNSIGNED_BYTE,allKeysImage.data);
+    glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,allKeysImage->width,allKeysImage->height);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,allKeysImage->width,allKeysImage->height,GL_RGBA,GL_UNSIGNED_BYTE,allKeysImage->data);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
     glBindTexture(GL_TEXTURE_2D,0);
 

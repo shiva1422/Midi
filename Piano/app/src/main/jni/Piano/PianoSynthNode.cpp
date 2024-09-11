@@ -6,6 +6,8 @@
 #define TAGLOG "PianoSynthNode"
 #include "../Midi/MidiFile.h"
 #include "../GN/IMediaNode.h"
+#include "../GN/MediaEvent.h"
+
 
 PianoSynthNode::PianoSynthNode()
 {
@@ -44,23 +46,30 @@ ENodeRes PianoSynthNode::prepare()
 
 ENodeRes PianoSynthNode::start()
 {
-    static bool bThreadCreated = false;
     if(!bThreadCreated)
     {
         synthThread = std::thread(&PianoSynthNode::run, this);
         bThreadCreated = true;
+        KSLOGD(TAGLOG,"synthThread Created");
+
     }
+    KSLOGD(TAGLOG,"synthStarted");
     return ENodeRes_OK;
 }
 
 ENodeRes PianoSynthNode::pause()
 {
-   return ENodeRes_OK;
+    MediaEvent event;
+    event.mEvent = EMediaEvent::PAUSE;
+    std::lock_guard<std::mutex> guard(mutEvents);
+    events.push(event);
+    return ENodeRes_OK;
 }
 
 ENodeRes PianoSynthNode::stop()
 {
-   return ENodeRes_OK;
+    bExitThread = true;
+    return ENodeRes_OK;
 }
 
 ENodeRes PianoSynthNode::release()
@@ -126,20 +135,18 @@ void PianoSynthNode::run()
 {
     /**
     * What does this do?
-    * Read and process any Events,Where do Events Come from(Midi/Piano Controller?
+    * Read and process any Events,Where do Events Come from(Midi/Piano Controller/player?
     * getNewPipeline and onPipelineInput
     */
     MediaPipeline *p = nullptr;
+    bPaused = false;
 
     while(!bExitThread)
     {
-
         processEvent();
         {
             std::unique_lock<std::mutex> lock{mutPipeline};
-            KSLOGD(TAGLOG, "waiting for pipeline");
             condPipeline.wait(lock, [&] { return !pipelineQ.empty(); });//Timed:there might be events?
-            KSLOGD(TAGLOG, "pipelineAvailable");
             p = pipelineQ.front();
             pipelineQ.pop();
         }
@@ -150,8 +157,35 @@ void PianoSynthNode::run()
 
 void PianoSynthNode::processEvent()
 {
-    //keep less than specific count
-   // bExitThread = true;
+    //TODO multiple events;
+    MediaEvent event;//cache
+    event.mEvent = EMediaEvent::NONE;
+    {
+        std::lock_guard<std::mutex> guard(mutEvents);
+        if (events.size()) {
+            event = events.front();
+            events.pop();
+        }
+    }
+
+    if(event.mEvent != EMediaEvent::NONE)
+    {
+        switch (event.mEvent)
+        {
+            case EMediaEvent::PAUSE:
+                bPaused = true;
+                KSLOGD(TAGLOG,"Pausing");
+                break;
+
+            default:
+                KSLOGW(TAGLOG,"Unknown Event");
+
+
+
+        }
+    }
+
+
 }
 
 int64_t PianoSynthNode::getCurrentTime()
