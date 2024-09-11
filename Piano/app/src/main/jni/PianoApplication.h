@@ -29,6 +29,8 @@ public:
 
     PianoApplication(android_app *app);
 
+    ~PianoApplication();
+
     bool onInterceptMotionEvent(const ks::MotionEvent &me) override;
 
 protected:
@@ -81,7 +83,6 @@ private:
 
 private:
 
-    PianoSynthNode piano;
 
     MidiPlayer midiPlayer;
     //This controls UI and Music Synth

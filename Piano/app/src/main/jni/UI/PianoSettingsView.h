@@ -12,7 +12,7 @@
 #include <string>
 
 
-class PianoSettingsView : public ViewGroup{
+class PianoSettingsView : public ViewGroup,public IPianoSettingsListener{
 
 
 public:
@@ -21,35 +21,38 @@ public:
 
     ~PianoSettingsView() override;
 
-     void draw() override;
+     //void draw() override;
 
      //Do after the bounds are set;
      void prepare();
 
      void setBounds(float startX, float startY,float width,float height) override;
 
-     void setPianoControl(IPianoSettingsControl*  control){ this->settingsControl = control;}
+     void setPianoControl(IPianoSettingsControl*  control){
+         this->settingsControl = control;
+         control->setSettingsListener(this);
+     }
+
+     void onKeyGeometryChanged() override;
 
 private:
 
-    void incrementKeyCount(int incCount);
-
-    void decrementKeyCount(int decCount);
-
-    void moveKeysRight(float whiteKeyFactor);
-
-    void moveKeysLeft(float whiteKeyFactor);
 
 
 private:
 
-    GLImageView keyCountDecView,keyCountIncView,keyPositionRightView,keyPositionLeftView,settingFrameView,allKeysView;
+    GLImageView keyCountDecView,keyCountIncView,keyPositionRightView,keyPositionLeftView,settingFrameView;
 
-    RectView keyPositionModifierView;
+    GLAlphaBlockImageView allKeysView;
+
+    RectView keyPositionModifierView;//This is not needed just forward touch events to allKeysView;
 
     IPianoSettingsControl *settingsControl = nullptr;
 
     friend class PianoSettingsItemClickListener;
+    friend class KeyPositionModifierTouchListener;
+
+    float positionModifierMovedDistance;
 
 
 };
@@ -81,7 +84,12 @@ protected:
 class KeyPositionModifierTouchListener : public  View::TouchListener
 {
 
+public:
+
+    KeyPositionModifierTouchListener(IPianoSettingsControl *settingCtrl){this->settingsControl = settingCtrl; }
+
 protected:
+
     ~KeyPositionModifierTouchListener() override;
 
     bool onTouch(const ks::MotionEvent &event, View *view) override;
@@ -98,11 +106,13 @@ protected:
 
     bool onHoverEnter(const float &d, const float &d1, const ks::TouchID &i) override;
 
+
 private:
 
     float initialX, initialY;
     ks::TouchID id = INT_MIN;
     bool bPointerActive = false;
+    IPianoSettingsControl *settingsControl = nullptr;
 
 };
 

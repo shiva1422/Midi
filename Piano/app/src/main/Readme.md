@@ -7,9 +7,9 @@ Separate Modules for DAW.
 * Full texturize.
 * Metronome.
 * drum pads.
-* Synthesizers, Wavetable Synthesis, ADSR envelopes(Attack,Decay,Sustain, Release).
+* Synthesizers, Wavetable Synthesis, ADSR envelopes(Attack,Decay,Sustain, Release)(continued dev).
 * Recording
-* Sheet Music.
+* Sheet Music.(continued Dev).
 * Midi Communications, Playback,editing,Synthesis.(Continued dev). Learning Mode.
 
 
@@ -20,3 +20,6 @@ Separate Modules for DAW.
 *EQ,Limiters.
 *
 </pre>
+
+
+<h2> Release 1.0.0 </h2>

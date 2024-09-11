@@ -11,7 +11,7 @@
 //TODO check if better to SetSynth first and UI next for latency
 PianoController::PianoController()
 {
-    synthController = reinterpret_cast<IPianoController *>(new PianoSynthNode());
+    synthController = new PianoSynthNode();
 }
 
 void PianoController::setKeysStates(const std::vector<KeyStateInfo> states)
@@ -57,6 +57,30 @@ void PianoController::setAssetManager(AssetManager *manager)
   this->assetManager = manager;
   PianoSynthNode *pSynthNode = reinterpret_cast<PianoSynthNode *>(synthController);
   pSynthNode->setAssetManager(manager);
+
+}
+
+int PianoController::release() {
+    return 0;
+}
+
+int PianoController::pause() {
+
+
+    audioRender->pause();
+    //pianoSynthNode->pause();
+
+    return 0;
+}
+
+int PianoController::exit() {
+    return 0;
+}
+
+int PianoController::resume() {
+
+    audioRender->start();
+    return 0;
 
 }
 

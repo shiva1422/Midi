@@ -1,3 +1,4 @@
 
 1. reuse shader library, compilation.
 2. transfer from file to text;
+3. compile mutiple shader sources once.

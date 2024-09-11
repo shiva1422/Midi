@@ -144,12 +144,14 @@ void PianoView::draw() {
     drawKeysAndNoteNames();
 }
 
-void PianoView::resizeKeyCount(int whiteKeysVisibleCnt)
+void PianoView::resizeKeyCount(int whiteKeysVisibleCnt,float translateFactor)
 {
 
+    translateFactor = this->numWhiteKeysVisible - whiteKeysVisibleCnt;
     this->numWhiteKeysVisible = whiteKeysVisibleCnt;
-    translateKeyXPosition(0);//because the translateFactor also depends on keyVisible. to scale thre translate aptly;
-    doPianoLayout();
+    ////because the translateFactor also depends on keyVisible. to scale  translate aptly;
+    translateKeyXPosition(-translateFactor/2.0);//0.5 halfkey right and half left. if inrementing key by not one this should be modified accordingly as (keyInc/DecCount)/2.0
+    //doPianoLayout();called in translateKeyXPosition;
 }
 
 void PianoView::setBounds(float startX, float startY, float width, float height)
@@ -280,22 +282,21 @@ void PianoView::prepare(AssetManager *assetManager)
 void PianoView::translateKeyXPosition(float factor)
 {
     factor *= -1;//Just to align with the direction;
-    keyTranslateXFactor += factor;
+    keyTranslateXFactor += factor;//half left and half right;
     float maxFactor = MAX_WHITEKEY_COUNT - numWhiteKeysVisible;
     if(keyTranslateXFactor > maxFactor)
     {
         keyTranslateXFactor = maxFactor;
         KSLOGW(TAGLOG,"Translating key Position already reached max val");
-        bMovePositionModifierRightDebug = false;
     }
     else if(keyTranslateXFactor < 0.0)
     {
         keyTranslateXFactor = 0.0;
-        bMovePositionModifierRightDebug = true;
         KSLOGW(TAGLOG,"Translating key Position already reached min val");
     }
 
     doPianoLayout();
+
 }
 
 void PianoView::doPianoLayout()
@@ -309,17 +310,7 @@ void PianoView::doPianoLayout()
 
     //TODO add methods to setBounds in DP in View
 
-    allKeysView.setBounds(startX + width * 20.0/100, startY, width * 60.0/100, 100);
-
-    //
-    keyPositionModifierOffset = keyTranslateXFactor * ((float)allKeysView.getWidth()) / (MAX_WHITEKEY_COUNT);
-   // keyPositionModifierView.setBounds(allKeysView.getStartX() + keyPositionModifierOffset, allKeysView.getStartY(), (allKeysView.getWidth() * (float) numWhiteKeysVisible) / MAX_WHITEKEY_COUNT, allKeysView.getHeight());
-
-    //keyCountModifierTranlations[0]= width - keyCountDecView.getWidth();//for translation of keyCountIncView
-   // keyCountModifierTranlations[1]=0;
-
-
-    int keyGapCnt = floor(keyTranslateXFactor);//TODO check required
+    //int keyGapCnt = floor(keyTranslateXFactor);//TODO check required
 
     globalKeyTranslateX = keyTranslateXFactor * (whiteKeyWidth ) + (((int)keyTranslateXFactor)*keyGap);// + keyGapCnt > 0 ?((keyGapCnt)*keyGap) : 0 ;//TODO was (int)keyTranslateXFactor;
 
@@ -335,6 +326,9 @@ void PianoView::doPianoLayout()
     //TODO DP
     noteNameView.setBounds(whiteKeyView.getStartX() + whiteKeyView.getWidth()/4.0 ,whiteKeyView.getStartY() + 0.8*whiteKeyView.getHeight(),whiteKeyView.getWidth()/4.0,whiteKeyView.getWidth()/4.0);
     octaveNumView.setBounds(noteNameView.getEndX(),noteNameView.getStartY(),noteNameView.getWidth(),noteNameView.getHeight());
+
+    if(settingsListener)
+        settingsListener->onKeyGeometryChanged();
 
 }
 

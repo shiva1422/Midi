@@ -123,7 +123,7 @@ private:
 
 private:
 
-    void resizeKeyCount(int whiteKeysVisibleCnt);
+    void resizeKeyCount(int whiteKeysVisibleCnt,float translateFactor = 0.5f);
 
     void initKeyRenderIndices();
 
@@ -169,22 +169,6 @@ private:
     float blackKeyTranslationsGL[5];
 
 
-    //WhiteKeys
-    int numWhiteKeysVisible = 15;
-
-    float whiteKeyWidth = 50;//px
-
-    float blackKeyWidth = 0.6 * whiteKeyWidth;
-
-    float keyGap = 1.0;//px
-
-    float globalKeyTranslateX = 0;//in pixels
-
-    //num of times(float) white key width the translate  will be calculated from;like when moving keys using positionmodifier
-    float keyTranslateXFactor = 20.0;
-
-    float keyPositionModifierOffset = 0.0;//The offset of KeyPositionModifierView from keyPositionModifierViewFull.startX(); calculated from keyTranslateXFactor
-
     bool bNoteNamesVisible = false;
 
     std::array<int,PIANO_MAX_KEY_COUNT> keyRenderIndices;
@@ -196,7 +180,7 @@ private:
 
 private:
     //Debug Only
-    bool bMovePositionModifierRightDebug = false;
+
 
 
 

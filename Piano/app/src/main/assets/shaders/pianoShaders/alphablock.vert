@@ -9,8 +9,16 @@ in vec2 textureCoords;
 
 out vec2 textCoordsOut;
 
+flat out int isBlock;
+//
+out vec2 vertsOut;
+
 void main()
 {
-    gl_Position = vec4(verts, 1.0, 1.0);
+
     textCoordsOut = textureCoords;
+
+    vertsOut = verts;
+
+    gl_Position = vec4(verts, 1.0, 1.0);
 }

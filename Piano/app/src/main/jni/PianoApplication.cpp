@@ -14,6 +14,12 @@ PianoApplication::PianoApplication(android_app *app): KSApplication(app,"PianoAp
 {
 
 }
+
+PianoApplication::~PianoApplication() {
+
+}
+
+
 void PianoApplication::runTasks()
 {
 
@@ -26,11 +32,11 @@ void PianoApplication::resizeUI()
     v->setBounds(displayMetrics.screenWidth*0/4, 0, displayMetrics.screenWidth, displayMetrics.screenHeight);
     topFrame->setBounds(v->getStartX(),v->getStartY(),v->getWidth(),v->getHeight() * 20/100);
     settingsView->setBounds(topFrame->getStartX(),topFrame->getEndY(),topFrame->getWidth(),v->getHeight() * 10/100);
-    pianoVew->setBounds(settingsView->getStartX(), settingsView->getEndY() , v->getWidth(),v->getHeight()*60.0/100 );//TODO this actually be triggered inside the viewgroup;
+    pianoVew->setBounds(settingsView->getStartX(), settingsView->getEndY() , v->getWidth(),v->getHeight()*70.0/100 );//TODO this actually be triggered inside the viewgroup;
 
-    float lightHeight = settingsView->getHeight() * 0.4;
-    light1->setBounds(settingsView->getStartX(),pianoVew->getStartY() + 1 ,settingsView->getWidth(),settingsView->getHeight()*0.2);
-    //light2->setBounds(settingsView->getStartX(),settingsView->getStartY(),light1->getWidth()*10,light1->getHeight());
+    float lightHeight = settingsView->getHeight() * 0.2;
+    light1->setBounds(settingsView->getStartX(),settingsView->getEndY() - lightHeight/2.0 ,settingsView->getWidth(),lightHeight);
+    light2->setBounds(settingsView->getStartX(),settingsView->getStartY()-lightHeight/2.0,settingsView->getWidth(),lightHeight);
 
 
 }
@@ -61,7 +67,7 @@ View * PianoApplication::createContentView() {
     settingsView = new PianoSettingsView();
     topFrame = new GLImageView();
     light1 = new GLImageView();
-    //light2 = new GLImageView();
+    light2 = new GLImageView();
 
     settingsView->setPianoControl(pianoVew);
     pianoVew->setTextEngine(&textEngine);
@@ -69,14 +75,14 @@ View * PianoApplication::createContentView() {
     settingsView->prepare();
     topFrame->setImage("icons/topframe.png");
     light1->setImage("icons/light.png");
-    //light2->setImage("icons/light.png");
+    light2->setImage("icons/light.png");
 
 
     contentView->addView(topFrame);
+    //contentView->addView(light2);
     contentView->addView(settingsView);
     contentView->addView(pianoVew);
     contentView->addView(light1);
-   // contentView->addView(light2);
 
 
 
@@ -85,9 +91,6 @@ View * PianoApplication::createContentView() {
     setContentView(contentView);
 
     resizeUI();//TODO better//On ViewWillAppear
-
-
-     //pianoVew->setClickListener(new ImageViewClickListener());
 
     pianoUIController = pianoVew->getController();
 
@@ -107,8 +110,7 @@ View * PianoApplication::createContentView() {
 
 void PianoApplication::onDraw()
 {
-    KSLOGD(appName.c_str(),"onDraw");
-   // midiPlayer.refresh();
+   // KSLOGD(appName.c_str(),"onDraw");
     KSApplication::onDraw();
 }
 
@@ -120,11 +122,13 @@ void PianoApplication::onStart()
 void PianoApplication::onResume()
 {
     KSApplication::onResume();
+    pianoController.resume();
 }
 
 void PianoApplication::onPause()
 {
     KSApplication::onPause();
+    pianoController.pause();
 }
 
 void PianoApplication::onStop()
