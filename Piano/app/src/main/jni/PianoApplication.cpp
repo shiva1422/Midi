@@ -27,7 +27,7 @@ void PianoApplication::runTasks()
 
 void PianoApplication::resizeUI()
 {
-    View *v = static_cast<View *>(renderer.getContent());
+    View *v = static_cast<View *>(renderer->getContent());
     //Should resize VIews automatically TODO but for now only PianoView so resize it
     v->setBounds(displayMetrics.screenWidth*0/4, 0, displayMetrics.screenWidth, displayMetrics.screenHeight);
     topFrame->setBounds(v->getStartX(),v->getStartY(),v->getWidth(),v->getHeight() * 20/100);
@@ -36,7 +36,7 @@ void PianoApplication::resizeUI()
 
     float lightHeight = settingsView->getHeight() * 0.2;
     light1->setBounds(settingsView->getStartX(),settingsView->getEndY() - lightHeight/2.0 ,settingsView->getWidth(),lightHeight);
-    light2->setBounds(settingsView->getStartX(),settingsView->getStartY()-lightHeight/2.0,settingsView->getWidth(),lightHeight);
+    //light2->setBounds(settingsView->getStartX(),settingsView->getStartY()-lightHeight/2.0,settingsView->getWidth(),lightHeight);
 
 
 }
@@ -67,7 +67,7 @@ View * PianoApplication::createContentView() {
     settingsView = new PianoSettingsView();
     topFrame = new GLImageView();
     light1 = new GLImageView();
-    light2 = new GLImageView();
+    //light2 = new GLImageView();
 
     settingsView->setPianoControl(pianoVew);
     pianoVew->setTextEngine(&textEngine);
@@ -75,7 +75,7 @@ View * PianoApplication::createContentView() {
     settingsView->prepare();
     topFrame->setImage("icons/topframe.png");
     light1->setImage("icons/light.png");
-    light2->setImage("icons/light.png");
+    //light2->setImage("icons/light.png");
 
 
     contentView->addView(topFrame);
@@ -145,8 +145,8 @@ void PianoApplication::onWindowInit()
 {
     KSApplication::onWindowInit();
 
-    int rW = renderer.getWidth();
-    int rH = renderer.getHeight();
+    int rW = renderer->getWidth();
+    int rH = renderer->getHeight();
     if(rW != displayMetrics.screenWidth || rH != displayMetrics.screenHeight)
     {
        KSLOGW(this->appName.c_str(),"DisplayMetrics and RenderWIndow (ANativeWindow ) size mismatch DM(%d,%d) window(%d,%d)",displayMetrics.screenWidth,displayMetrics.screenHeight,rW,rH);
